@@ -1,0 +1,40 @@
+cabal-version:       2.0
+name:                fedora-dists
+version:             0.0.0
+synopsis:            Library for Fedora distribution versions
+description:         Library for Fedora distribution versions
+homepage:            https://github.com/juhp/fedora-dists
+bug-reports:         https://github.com/juhp/fedora-dists/issues
+license:             GPL-3
+license-file:        LICENSE
+author:              Jens Petersen
+maintainer:          petersen@fedoraproject.org
+copyright:           2018 Jens Petersen
+build-type:          Simple
+extra-doc-files:     README.md
+                   , CHANGELOG.md
+tested-with:         GHC == 8.4.4
+
+source-repository head
+  type:                git
+  location:            https://github.com/juhp/fedora-dists.git
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     FedoraDists
+                       
+
+  build-depends:       base ^>= 4.11.1.0
+                     
+
+  ghc-options:         -Wall
+                       -Wincomplete-uni-patterns
+                       -Wincomplete-record-updates
+                       -Wcompat
+                       -Widentities
+                       -Wredundant-constraints
+                       -fhide-source-paths
+                       -Wmissing-export-lists
+                       -Wpartial-fields
+
+  default-language:    Haskell2010
