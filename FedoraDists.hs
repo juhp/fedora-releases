@@ -35,7 +35,7 @@ import Data.Maybe (fromMaybe, maybe)
 type Dist = String
 
 dists :: [Dist]
-dists = [rawhide, "f29", "f28", "f27", "epel7"]
+dists = [rawhide, "f29", "f28", "epel7"]
 
 rawhide :: String
 rawhide = "f30"
