@@ -1,4 +1,4 @@
-cabal-version:       2.0
+cabal-version:       >= 1.10
 name:                fedora-dists
 version:             1.0.0
 synopsis:            Library for Fedora distribution versions
@@ -25,12 +25,10 @@ source-repository head
 
 library
   exposed-modules:     FedoraDists
-                       
 
   build-depends:       base < 5
-                     
 
   ghc-options:         -Wall
                        -fwarn-missing-signatures
-
+  default-extensions:  CPP
   default-language:    Haskell2010

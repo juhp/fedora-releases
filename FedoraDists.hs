@@ -34,6 +34,11 @@ import Data.Version
 import Data.Maybe (fromMaybe)
 import Text.Read
 
+#if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
+#else
+import Control.Applicative ((<$>), (*>))
+#endif
+
 data Dist = Fedora Int | EPEL Int | RHEL Version
   deriving (Eq)
 
