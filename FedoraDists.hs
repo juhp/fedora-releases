@@ -14,77 +14,102 @@
 -- (at your option) any later version.
 
 module FedoraDists
-  (Dist,
+  (Dist(..),
    dists,
    distBranch,
-   distShort,
-   distVersion,
    distRepo,
    distTag,
    distTarget,
    distUpdates,
    distOverride,
    hackageRelease,
+   kojicmd,
    releaseVersion,
    rawhide,
+   rawhideRelease,
+   rpkg,
    rpmDistTag) where
 
-import Data.Char (isDigit)
-import Data.Maybe (fromMaybe, maybe)
+import Data.Version
+import Data.Maybe (fromMaybe)
+import Text.Read
 
-type Dist = String
+data Dist = Fedora Int | EPEL Int | RHEL Version
+  deriving (Eq)
+
+instance Show Dist where
+  show (Fedora n) = "f" ++ show n
+  show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
+  show (RHEL v) = "rhel-" ++ show v
+
+instance Read Dist where
+  readPrec = choice [pFedora, pEPEL, pRHEL] where
+    pChar c = do
+      c' <- get
+      if c == c'
+        then return c
+        else pfail
+    pFedora = Fedora <$> (pChar 'f' *> readPrec)
+    pEPEL = EPEL <$> (traverse pChar "epel" *> readPrec)
+    pRHEL = RHEL <$> (traverse pChar "rhel-" *> readPrec)
+
+  readListPrec = readListPrecDefault
 
 dists :: [Dist]
-dists = [rawhide, "f29", "f28", "epel7"]
+dists = [rawhide, Fedora 29, Fedora 28, EPEL 7]
 
-rawhide :: String
-rawhide = "f30"
+rawhideRelease :: Int
+rawhideRelease = 30
+
+rawhide :: Dist
+rawhide = Fedora rawhideRelease
 
 sidetag :: Dist -> Maybe String
---sidetag "f30" = Just "ghc"
+--sidetag (Fedora n) | n == rawhideRelease = Just "ghc"
 sidetag _ = Nothing
 
-hackageRelease :: String
-hackageRelease = "f29"
+hackageRelease :: Dist
+hackageRelease = Fedora (rawhideRelease - 1)
 
 distBranch :: Dist -> String
-distBranch d | d == rawhide = "master"
-             | otherwise = d
-
-splitDist :: Dist -> (String, String)
-splitDist = break isDigit
-
-distShort :: Dist -> String
-distShort = fst . splitDist
-
-distVersion :: Dist -> String
-distVersion = snd . splitDist
+distBranch (Fedora n) | n >= rawhideRelease = "master"
+distBranch d = show d
 
 distRepo :: Dist -> String
-distRepo d | d == rawhide = "rawhide"
-           | distShort d == "f" = "fedora"
-           | distShort d `elem` ["epel", "el"] = "epel"
-distRepo d = error $ "Unknown dist " ++ d
+distRepo (Fedora n) | n >= rawhideRelease = "rawhide"
+                    | otherwise = "fedora"
+distRepo (EPEL _) = "epel"
+distRepo (RHEL _) = "rhel"
 
 distUpdates :: Dist -> Maybe String
-distUpdates d | distShort d == "f" = Just "updates"
+distUpdates (Fedora n) | n >= rawhideRelease = Nothing
+distUpdates (Fedora _) = Just "updates"
 distUpdates _ = Nothing
 
 distOverride :: Dist -> Bool
-distOverride d = d `notElem` [rawhide, "f30" , "epel8"]
+distOverride d = d `notElem` [rawhide, Fedora 30 , EPEL 8]
 
 distTag :: Dist -> String
-distTag d = d ++ "-" ++ fromMaybe "build" (sidetag d)
+distTag d = show d ++ "-" ++ fromMaybe "build" (sidetag d)
 
 distTarget  :: Dist -> String
-distTarget d = maybe d (\ suff -> d ++ "-" ++ suff) (sidetag d)
+distTarget d = show d ++ "-" ++ fromMaybe "" (sidetag d)
 
-releaseVersion :: Dist -> Maybe String
-releaseVersion r | r == rawhide = Just "rawhide"
-releaseVersion r = if all isDigit v then Just v else Nothing
-  where
-    v = distVersion r
+releaseVersion :: Dist -> String
+releaseVersion (Fedora n) | n >= rawhideRelease = "rawhide"
+releaseVersion (Fedora n) = show n
+releaseVersion (EPEL n) = show n
+releaseVersion (RHEL n) = show n
 
 rpmDistTag :: Dist -> String
-rpmDistTag ('f':r) = ".fc" ++ r
-rpmDistTag d = '.' : d
+rpmDistTag (Fedora n) = ".fc" ++ show n
+rpmDistTag (RHEL v) = ".el" ++ (show . head . versionBranch) v
+rpmDistTag d = '.' : show d
+
+kojicmd :: Dist -> String
+kojicmd (RHEL _) = "brew"
+kojicmd _ =  "koji"
+
+rpkg :: Dist -> String
+rpkg (RHEL _) = "rhpkg"
+rpkg _ = "fedpkg"
