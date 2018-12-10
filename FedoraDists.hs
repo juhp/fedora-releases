@@ -37,6 +37,7 @@ import Text.Read
 #if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
 #else
 import Control.Applicative ((<$>), (*>))
+import Data.Traversable (traverse)
 #endif
 
 data Dist = Fedora Int | EPEL Int | RHEL Version
