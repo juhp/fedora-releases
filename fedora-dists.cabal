@@ -1,6 +1,6 @@
 cabal-version:       2.0
 name:                fedora-dists
-version:             30.0.0
+version:             1.0.0
 synopsis:            Library for Fedora distribution versions
 homepage:            https://github.com/juhp/fedora-dists
 bug-reports:         https://github.com/juhp/fedora-dists/issues
