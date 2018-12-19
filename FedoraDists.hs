@@ -40,7 +40,11 @@ import Control.Applicative ((<$>), (*>))
 import Data.Traversable (traverse)
 #endif
 
-data Dist = Fedora Int | EPEL Int | RHEL Version
+-- | The `Dist` datatype specifies the target OS and version.
+-- (roughly corresponds to a git branch)
+data Dist = Fedora Int -- ^ Fedora release
+          | EPEL Int -- ^ EPEL release
+          | RHEL Version -- ^ RHEL version
   deriving (Eq)
 
 instance Show Dist where
@@ -48,6 +52,7 @@ instance Show Dist where
   show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
   show (RHEL v) = "rhel-" ++ show v
 
+-- | Read from eg "f29", "epel7"
 instance Read Dist where
   readPrec = choice [pFedora, pEPEL, pRHEL] where
     pChar c = do
@@ -61,37 +66,46 @@ instance Read Dist where
 
   readListPrec = readListPrecDefault
 
+-- | Current maintained distribution releases.
 dists :: [Dist]
 dists = [rawhide, Fedora 29, Fedora 28, EPEL 7]
 
+-- | The Fedora release number corresponding to current Rawhide
 rawhideRelease :: Int
 rawhideRelease = 30
 
+-- | The Fedora release corresponding to Rawhide
 rawhide :: Dist
 rawhide = Fedora rawhideRelease
 
+-- | Used for Koji sidetag when needed.
 sidetag :: Dist -> Maybe String
 --sidetag (Fedora n) | n == rawhideRelease = Just "ghc"
 sidetag _ = Nothing
 
+-- | The Fedora release being tracked in Hackage Distro data (`rawhideRelease` - 1)
 hackageRelease :: Dist
 hackageRelease = Fedora (rawhideRelease - 1)
 
+-- | Maps `Dist` to package distgit branch
 distBranch :: Dist -> String
 distBranch (Fedora n) | n >= rawhideRelease = "master"
 distBranch d = show d
 
+-- | Map `Dist` to DNF/YUM repo name
 distRepo :: Dist -> String
 distRepo (Fedora n) | n >= rawhideRelease = "rawhide"
                     | otherwise = "fedora"
 distRepo (EPEL _) = "epel"
 distRepo (RHEL _) = "rhel"
 
+-- | Map `Dist` to Maybe the DNF/YUM updates repo name
 distUpdates :: Dist -> Maybe String
 distUpdates (Fedora n) | n >= rawhideRelease = Nothing
 distUpdates (Fedora _) = Just "updates"
 distUpdates _ = Nothing
 
+-- | Whether dist has overrides in Bodhi
 distOverride :: Dist -> Bool
 distOverride d = d `notElem` [rawhide, Fedora 30 , EPEL 8]
 
