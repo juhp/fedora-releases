@@ -3,6 +3,11 @@
 `fedora-dists` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
+1.0.0.2
+=======
+* add haddock strings
+* base >= 4.6 (ghc-7.6)
+
 1.0.0
 =====
 
