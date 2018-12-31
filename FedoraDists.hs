@@ -24,6 +24,7 @@ module FedoraDists
    distOverride,
    hackageRelease,
    kojicmd,
+   mockConfig,
    releaseVersion,
    rawhide,
    rawhideRelease,
@@ -133,3 +134,7 @@ kojicmd _ =  "koji"
 rpkg :: Dist -> String
 rpkg (RHEL _) = "rhpkg"
 rpkg _ = "fedpkg"
+
+mockConfig :: Dist -> String -> String
+mockConfig dist arch =
+  distRepo dist ++ "-" ++ releaseVersion dist ++ "-" ++ arch
