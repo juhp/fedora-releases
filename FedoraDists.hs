@@ -69,11 +69,11 @@ instance Read Dist where
 
 -- | Current maintained distribution releases.
 dists :: [Dist]
-dists = [rawhide, Fedora 29, Fedora 28, EPEL 7]
+dists = [rawhide, Fedora 30, Fedora 29, Fedora 28, EPEL 7, EPEL 6]
 
 -- | The Fedora release number corresponding to current Rawhide
 rawhideRelease :: Int
-rawhideRelease = 30
+rawhideRelease = 31
 
 -- | The Fedora release corresponding to Rawhide
 rawhide :: Dist
