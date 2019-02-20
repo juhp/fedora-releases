@@ -138,3 +138,8 @@ rpkg _ = "fedpkg"
 mockConfig :: Dist -> String -> String
 mockConfig dist arch =
   distRepo dist ++ "-" ++ releaseVersion dist ++ "-" ++ arch
+
+distContainer :: Dist -> String
+distContainer (Fedora n) = "fedora:" ++ show n
+distContainer (EPEL n) = "centos:" ++ show n
+distContainer (RHEL n) = "rhel" ++ show n
