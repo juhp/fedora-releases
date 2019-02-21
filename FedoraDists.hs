@@ -17,6 +17,7 @@ module FedoraDists
   (Dist(..),
    dists,
    distBranch,
+   distContainer,
    distRepo,
    distTag,
    distTarget,
@@ -81,7 +82,7 @@ rawhide = Fedora rawhideRelease
 
 -- | Used for Koji sidetag when needed.
 sidetag :: Dist -> Maybe String
---sidetag (Fedora n) | n == rawhideRelease = Just "ghc"
+sidetag (Fedora n) | n == rawhideRelease = Just "ghc"
 sidetag _ = Nothing
 
 -- | The Fedora release being tracked in Hackage Distro data (`rawhideRelease` - 1)
@@ -110,35 +111,43 @@ distUpdates _ = Nothing
 distOverride :: Dist -> Bool
 distOverride d = d `notElem` [rawhide, Fedora 30 , EPEL 8]
 
+-- | Maps `Dist` to build tag
 distTag :: Dist -> String
 distTag d = show d ++ "-" ++ fromMaybe "build" (sidetag d)
 
+-- | Maps `Dist` to target tag
 distTarget  :: Dist -> String
 distTarget d = show d ++ "-" ++ fromMaybe "" (sidetag d)
 
+-- | OS release major version for `Dist`
 releaseVersion :: Dist -> String
 releaseVersion (Fedora n) | n >= rawhideRelease = "rawhide"
 releaseVersion (Fedora n) = show n
 releaseVersion (EPEL n) = show n
 releaseVersion (RHEL n) = show n
 
+-- | `Dist` tag (appended to rpm package release field)
 rpmDistTag :: Dist -> String
 rpmDistTag (Fedora n) = ".fc" ++ show n
 rpmDistTag (RHEL v) = ".el" ++ (show . head . versionBranch) v
 rpmDistTag d = '.' : show d
 
+-- | Command line tool for `Dist` (eg "koji")
 kojicmd :: Dist -> String
 kojicmd (RHEL _) = "brew"
 kojicmd _ =  "koji"
 
+-- | rpkg command for `Dist` (eg "fedpkg")
 rpkg :: Dist -> String
 rpkg (RHEL _) = "rhpkg"
 rpkg _ = "fedpkg"
 
+-- | Mock configuration for `Dist` and arch
 mockConfig :: Dist -> String -> String
 mockConfig dist arch =
   distRepo dist ++ "-" ++ releaseVersion dist ++ "-" ++ arch
 
+-- | Map `Dist` to a container image
 distContainer :: Dist -> String
 distContainer (Fedora n) = "fedora:" ++ show n
 distContainer (EPEL n) = "centos:" ++ show n
