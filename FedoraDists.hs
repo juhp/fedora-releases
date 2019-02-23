@@ -82,7 +82,7 @@ rawhide = Fedora rawhideRelease
 
 -- | Used for Koji sidetag when needed.
 sidetag :: Dist -> Maybe String
-sidetag (Fedora n) | n == rawhideRelease = Just "ghc"
+--sidetag (Fedora n) | n == rawhideRelease = Just "ghc"
 sidetag _ = Nothing
 
 -- | The Fedora release being tracked in Hackage Distro data (`rawhideRelease` - 1)
