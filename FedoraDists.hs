@@ -19,8 +19,6 @@ module FedoraDists
    distBranch,
    distContainer,
    distRepo,
-   distTag,
-   distTarget,
    distUpdates,
    distOverride,
    hackageRelease,
@@ -33,7 +31,6 @@ module FedoraDists
    rpmDistTag) where
 
 import Data.Version
-import Data.Maybe (fromMaybe)
 import Text.Read
 
 #if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
@@ -80,11 +77,6 @@ rawhideRelease = 31
 rawhide :: Dist
 rawhide = Fedora rawhideRelease
 
--- | Used for Koji sidetag when needed.
-sidetag :: Dist -> Maybe String
---sidetag (Fedora n) | n == rawhideRelease = Just "ghc"
-sidetag _ = Nothing
-
 -- | The Fedora release being tracked in Hackage Distro data (`rawhideRelease` - 1)
 hackageRelease :: Dist
 hackageRelease = Fedora (rawhideRelease - 1)
@@ -110,14 +102,6 @@ distUpdates _ = Nothing
 -- | Whether dist has overrides in Bodhi
 distOverride :: Dist -> Bool
 distOverride d = d `notElem` [rawhide, Fedora 30 , EPEL 8]
-
--- | Maps `Dist` to build tag
-distTag :: Dist -> String
-distTag d = show d ++ "-" ++ fromMaybe "build" (sidetag d)
-
--- | Maps `Dist` to target tag
-distTarget  :: Dist -> String
-distTarget d = show d ++ "-" ++ fromMaybe "" (sidetag d)
 
 -- | OS release major version for `Dist`
 releaseVersion :: Dist -> String
