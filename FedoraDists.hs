@@ -21,7 +21,6 @@ module FedoraDists
    distRepo,
    distUpdates,
    distOverride,
-   hackageRelease,
    kojicmd,
    mockConfig,
    releaseVersion,
@@ -76,10 +75,6 @@ rawhideRelease = 31
 -- | The Fedora release corresponding to Rawhide
 rawhide :: Dist
 rawhide = Fedora rawhideRelease
-
--- | The Fedora release being tracked in Hackage Distro data (`rawhideRelease` - 1)
-hackageRelease :: Dist
-hackageRelease = Fedora (rawhideRelease - 1)
 
 -- | Maps `Dist` to package distgit branch
 distBranch :: Dist -> String
