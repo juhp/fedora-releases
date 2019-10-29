@@ -2,6 +2,11 @@
 
 `fedora-dists` uses [PVP Versioning](https://pvp.haskell.org).
 
+## 1.1.0
+- update for Fedora 31
+- haddock documentation
+- move distTag, distTarget and hackageRelease to fedora-haskell-tools
+
 ## 1.0.1
 - add mockConfig and distContainer
 - Fedora 30 branched from Rawhide
