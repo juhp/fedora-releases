@@ -66,11 +66,11 @@ instance Read Dist where
 
 -- | Current maintained distribution releases.
 dists :: [Dist]
-dists = [rawhide, Fedora 30, Fedora 29, Fedora 28, EPEL 7, EPEL 6]
+dists = [rawhide, Fedora 31, Fedora 30, Fedora 29, EPEL 8, EPEL 7, EPEL 6]
 
 -- | The Fedora release number corresponding to current Rawhide
 rawhideRelease :: Int
-rawhideRelease = 31
+rawhideRelease = 32
 
 -- | The Fedora release corresponding to Rawhide
 rawhide :: Dist
@@ -96,7 +96,7 @@ distUpdates _ = Nothing
 
 -- | Whether dist has overrides in Bodhi
 distOverride :: Dist -> Bool
-distOverride d = d `notElem` [rawhide, Fedora 30 , EPEL 8]
+distOverride d = d `notElem` [rawhide, Fedora 32 , EPEL 9]
 
 -- | OS release major version for `Dist`
 releaseVersion :: Dist -> String
