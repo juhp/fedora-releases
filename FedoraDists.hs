@@ -31,6 +31,7 @@ module FedoraDists
 
 import Data.Version
 import Text.Read
+import Text.ParserCombinators.ReadP (char, eof, string)
 
 #if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
 #else
@@ -48,21 +49,17 @@ data Dist = Fedora Int -- ^ Fedora release
 instance Show Dist where
   show (Fedora n) = "f" ++ show n
   show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
-  show (RHEL v) = "rhel-" ++ show v
+  show (RHEL v) = "rhel-" ++ showVersion v
 
 -- | Read from eg "f29", "epel7"
 instance Read Dist where
   readPrec = choice [pFedora, pEPEL, pRHEL] where
-    pChar c = do
-      c' <- get
-      if c == c'
-        then return c
-        else pfail
-    pFedora = Fedora <$> (pChar 'f' *> readPrec)
-    pEPEL = EPEL <$> (traverse pChar "epel" *> readPrec)
-    pRHEL = RHEL <$> (traverse pChar "rhel-" *> readPrec)
-
-  readListPrec = readListPrecDefault
+    pFedora = Fedora <$> (lift (char 'f') *> readPrec)
+    pEPEL = EPEL <$> (lift (string "epel") *> readPrec)
+    pRHEL = RHEL <$> lift (do
+      v <- string "rhel-" >> parseVersion
+      eof
+      return v)
 
 -- | Current maintained distribution releases.
 dists :: [Dist]
