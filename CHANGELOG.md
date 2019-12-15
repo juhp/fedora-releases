@@ -2,7 +2,10 @@
 
 `fedora-dists` uses [PVP Versioning](https://pvp.haskell.org).
 
-## 1.1.0
+## 1.1.1 (2019-12-15)
+- fix read and show for RHEL
+
+## 1.1.0 (2019-10-29)
 - update for Fedora 31
 - haddock documentation
 - move distTag, distTarget and hackageRelease to fedora-haskell-tools
