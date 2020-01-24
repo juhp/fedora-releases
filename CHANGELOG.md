@@ -2,6 +2,10 @@
 
 `fedora-dists` uses [PVP Versioning](https://pvp.haskell.org).
 
+## 1.1.2 (2020-01-24)
+- mockConfig rawhide version
+- drop F29 and EPEL6
+
 ## 1.1.1 (2019-12-15)
 - fix read and show for RHEL
 

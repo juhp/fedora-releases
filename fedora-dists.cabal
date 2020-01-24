@@ -12,7 +12,7 @@ license:             GPL-3
 license-file:        LICENSE
 author:              Jens Petersen
 maintainer:          petersen@fedoraproject.org
-copyright:           2018 Jens Petersen
+copyright:           2018-2020 Jens Petersen
 category:            Distribution
 build-type:          Simple
 extra-doc-files:     README.md

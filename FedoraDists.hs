@@ -1,6 +1,6 @@
 -- |
 -- Module      :  FedoraDists
--- Copyright   :  (C) 2014-2018  Jens Petersen
+-- Copyright   :  (C) 2014-2020  Jens Petersen
 --
 -- Maintainer  :  Jens Petersen <petersen@fedoraproject.org>
 -- Stability   :  alpha
