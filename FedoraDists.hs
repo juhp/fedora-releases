@@ -121,7 +121,12 @@ rpkg _ = "fedpkg"
 -- | Mock configuration for `Dist` and arch
 mockConfig :: Dist -> String -> String
 mockConfig dist arch =
-  distRepo dist ++ "-" ++ releaseVersion dist ++ "-" ++ arch
+  let prefix =
+        case dist of
+          Fedora _ -> "fedora"
+          _ -> distRepo dist
+  in
+  prefix ++ "-" ++ releaseVersion dist ++ "-" ++ arch
 
 -- | Map `Dist` to a container image
 distContainer :: Dist -> String
