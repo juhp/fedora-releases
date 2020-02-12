@@ -35,6 +35,7 @@ library
                      , filepath
                      , simple-cmd
                      , text
+                     , time
 
   ghc-options:         -Wall
                        -fwarn-missing-signatures

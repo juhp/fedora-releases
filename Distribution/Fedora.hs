@@ -21,7 +21,10 @@ module Distribution.Fedora
    distRepo,
    distUpdates,
    distOverride,
-   getProducts,
+   getReleases,
+   getProductReleases,
+   getRelease,
+   Release(..),
    kojicmd,
    mockConfig,
    releaseVersion,
@@ -31,10 +34,12 @@ module Distribution.Fedora
    rpmDistTag) where
 
 import Control.Monad
+import Data.List
 import Data.Text (Text)
+import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Data.Version
 import SimpleCmd (cmd_)
-import System.Directory (doesFileExist, getHomeDirectory)
+import System.Directory
 import System.FilePath ((</>))
 import Text.Read
 import Text.ParserCombinators.ReadP (char, eof, string)
@@ -45,7 +50,7 @@ import Control.Applicative ((<$>), (*>))
 import Data.Traversable (traverse)
 #endif
 
-import Distribution.Fedora.Products
+import Distribution.Fedora.Products hiding (releaseVersion)
 
 -- | The `Dist` datatype specifies the target OS and version.
 -- (roughly corresponds to a git branch)
@@ -72,17 +77,36 @@ instance Read Dist where
 getProductsFile :: IO FilePath
 getProductsFile = do
   home <- getHomeDirectory
-  let file = home </> ".fedora/products.json"
-  have <- doesFileExist file
-  unless have $
-    cmd_ "curl" ["--silent", "--show-error", "-o", file, "--remote-time", "https://pdc.fedoraproject.org/rest_api/v1/products/"]
+  let file = home </> ".fedora/product-versions.json"
+  recent <- do
+    have <- doesFileExist file
+    if have then do
+      ts <- getModificationTime file
+      t <- getCurrentTime
+      -- about 5.5 hours
+      return $ diffUTCTime t ts < 20000
+    else return False
+  unless recent $
+    cmd_ "curl" ["--silent", "--show-error", "-o", file, "https://pdc.fedoraproject.org/rest_api/v1/product-versions/?active=true"]
   return file
 
-getProducts :: Text -> IO [Text]
-getProducts name = do
+getReleases :: IO [Release]
+getReleases = do
   file <- getProductsFile
-  products <- filter (\p -> productName p == name) . productsResults <$> parse file
-  return $ concatMap productVersions products
+  productsResults <$> parse file
+
+getProductReleases :: Text -> IO [Release]
+getProductReleases name =
+  filter (\p -> releaseProduct p == name) <$> getReleases
+
+getRelease :: Text -> IO (Maybe Release)
+getRelease pv =
+  find (\p -> releaseProductVersionId p == pv) <$> getReleases
+
+-- activeRelease :: Text -> IO Bool
+-- activeRelease pv = do
+--   res <- filter (\p -> releaseProductVersionId p == pv) <$> getReleases
+--   return $ not (null res)
 
 -- | Current maintained distribution releases.
 dists :: [Dist]

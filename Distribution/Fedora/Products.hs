@@ -13,46 +13,51 @@ import           Data.Monoid((<>))
 import           Data.Text (Text)
 import qualified GHC.Generics
 
-data Product = Product {
-    productAllowedPushTargets :: [[Maybe Value]],
-    productActive :: Bool,
-    productName :: Text,
-    productShort :: Text,
-    productVersions :: [Text]
+data Release = Release {
+    releaseProductVersionId :: Text,
+    releaseReleases :: [Text],
+    releaseAllowedPushTargets :: [[Maybe Value]],
+    releaseActive :: Bool,
+    releaseName :: Text,
+    releaseVersion :: Text,
+    releaseShort :: Text,
+    releaseProduct :: Text
   } deriving (Show,Eq,GHC.Generics.Generic)
 
 
-instance FromJSON Product where
-  parseJSON (Object v) = Product <$> v .:  "allowed_push_targets" <*> v .:  "active" <*> v .:  "name" <*> v .:  "short" <*> v .:  "product_versions"
+instance FromJSON Release where
+  parseJSON (Object v) = Release <$> v .:  "product_version_id" <*> v .:  "releases" <*> v .:  "allowed_push_targets" <*> v .:  "active" <*> v .:  "name" <*> v .:  "version" <*> v .:  "short" <*> v .:  "product"
   parseJSON _          = mzero
 
 
-instance ToJSON Product where
-  toJSON     Product {..} = object ["allowed_push_targets" .= productAllowedPushTargets, "active" .= productActive, "name" .= productName, "short" .= productShort, "product_versions" .= productVersions]
-  toEncoding Product {..} = pairs  ("allowed_push_targets" .= productAllowedPushTargets<>"active" .= productActive<>"name" .= productName<>"short" .= productShort<>"product_versions" .= productVersions)
+instance ToJSON Release where
+  toJSON     Release {..} = object ["product_version_id" .= releaseProductVersionId, "releases" .= releaseReleases, "allowed_push_targets" .= releaseAllowedPushTargets, "active" .= releaseActive, "name" .= releaseName, "version" .= releaseVersion, "short" .= releaseShort, "product" .= releaseProduct]
+  toEncoding Release {..} = pairs  ("product_version_id" .= releaseProductVersionId<>"releases" .= releaseReleases<>"allowed_push_targets" .= releaseAllowedPushTargets<>"active" .= releaseActive<>"name" .= releaseName<>"version" .= releaseVersion<>"short" .= releaseShort<>"product" .= releaseProduct)
 
 
-data Products = Products {
+data ProductReleases = ProductReleases {
     productsNext :: Maybe Value,
-    productsResults :: [Product],
+    productsResults :: [Release],
     productsCount :: Int,
     productsPrevious :: Maybe Value
   } deriving (Show,Eq,GHC.Generics.Generic)
 
 
-instance FromJSON Products where
-  parseJSON (Object v) = Products <$> v .:? "next" <*> v .:  "results" <*> v .:  "count" <*> v .:? "previous"
+instance FromJSON ProductReleases where
+  parseJSON (Object v) = ProductReleases <$> v .:? "next" <*> v .:  "results" <*> v .:  "count" <*> v .:? "previous"
   parseJSON _          = mzero
 
 
-instance ToJSON Products where
-  toJSON     Products {..} = object ["next" .= productsNext, "results" .= productsResults, "count" .= productsCount, "previous" .= productsPrevious]
-  toEncoding Products {..} = pairs  ("next" .= productsNext<>"results" .= productsResults<>"count" .= productsCount<>"previous" .= productsPrevious)
+instance ToJSON ProductReleases where
+  toJSON     ProductReleases {..} = object ["next" .= productsNext, "results" .= productsResults, "count" .= productsCount, "previous" .= productsPrevious]
+  toEncoding ProductReleases {..} = pairs  ("next" .= productsNext<>"results" .= productsResults<>"count" .= productsCount<>"previous" .= productsPrevious)
 
 
-parse :: FilePath -> IO Products
+
+
+parse :: FilePath -> IO ProductReleases
 parse filename = do
     input <- BSL.readFile filename
     case eitherDecode input of
       Left  err -> error $ "Invalid JSON file: " ++ filename ++ "\n" ++ err
-      Right r   -> return (r :: Products)
+      Right r   -> return (r :: ProductReleases)
