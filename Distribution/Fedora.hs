@@ -13,7 +13,7 @@
 -- the Free Software Foundation, either version 3 of the License, or
 -- (at your option) any later version.
 
-module FedoraDists
+module Distribution.Fedora
   (Dist(..),
    dists,
    distBranch,
@@ -21,6 +21,7 @@ module FedoraDists
    distRepo,
    distUpdates,
    distOverride,
+   getProducts,
    kojicmd,
    mockConfig,
    releaseVersion,
@@ -29,7 +30,12 @@ module FedoraDists
    rpkg,
    rpmDistTag) where
 
+import Control.Monad
+import Data.Text (Text)
 import Data.Version
+import SimpleCmd (cmd_)
+import System.Directory (doesFileExist, getHomeDirectory)
+import System.FilePath ((</>))
 import Text.Read
 import Text.ParserCombinators.ReadP (char, eof, string)
 
@@ -38,6 +44,8 @@ import Text.ParserCombinators.ReadP (char, eof, string)
 import Control.Applicative ((<$>), (*>))
 import Data.Traversable (traverse)
 #endif
+
+import Distribution.Fedora.Products
 
 -- | The `Dist` datatype specifies the target OS and version.
 -- (roughly corresponds to a git branch)
@@ -60,6 +68,21 @@ instance Read Dist where
       v <- string "rhel-" >> parseVersion
       eof
       return v)
+
+getProductsFile :: IO FilePath
+getProductsFile = do
+  home <- getHomeDirectory
+  let file = home </> ".fedora/products.json"
+  have <- doesFileExist file
+  unless have $
+    cmd_ "curl" ["--silent", "--show-error", "-o", file, "--remote-time", "https://pdc.fedoraproject.org/rest_api/v1/products/"]
+  return file
+
+getProducts :: Text -> IO [Text]
+getProducts name = do
+  file <- getProductsFile
+  products <- filter (\p -> productName p == name) . productsResults <$> parse file
+  return $ concatMap productVersions products
 
 -- | Current maintained distribution releases.
 dists :: [Dist]
