@@ -1,5 +1,6 @@
 language: haskell
 dist: bionic
+cabal: "2.4"
 
 branches:
   only:
