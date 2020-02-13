@@ -2,7 +2,11 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE DeriveGeneric       #-}
 
-module Distribution.Fedora.Products where
+module Distribution.Fedora.Products
+  ( Release(..)
+  , parseReleases
+  )
+where
 
 import qualified Data.ByteString.Lazy.Char8 as BSL
 import           Control.Monad      (mzero)
@@ -56,11 +60,9 @@ instance ToJSON ProductReleases where
   toEncoding ProductReleases {..} = pairs  ("next" .= productsNext<>"results" .= productsResults<>"count" .= productsCount<>"previous" .= productsPrevious)
 
 
-
-
-parse :: FilePath -> IO ProductReleases
-parse filename = do
+parseReleases :: FilePath -> IO [Release]
+parseReleases filename = do
     input <- BSL.readFile filename
     case eitherDecode input of
       Left  err -> error $ "Invalid JSON file: " ++ filename ++ "\n" ++ err
-      Right r   -> return (r :: ProductReleases)
+      Right r   -> return $ productsResults r

@@ -97,7 +97,7 @@ getProductsFile = do
 getReleases :: IO [Release]
 getReleases = do
   file <- getProductsFile
-  reverse . productsResults <$> parse file
+  reverse <$> parseReleases file
 
 getReleaseIds :: IO [Text]
 getReleaseIds = map releaseProductVersionId <$> getReleases
