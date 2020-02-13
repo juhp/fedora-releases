@@ -24,6 +24,9 @@ data Release = Release {
     releaseProduct :: Text
   } deriving (Show,Eq,GHC.Generics.Generic)
 
+instance Ord Release where
+  compare r1 r2 =
+    compare (releaseProductVersionId r1) (releaseProductVersionId r2)
 
 instance FromJSON Release where
   parseJSON (Object v) = Release <$> v .:  "product_version_id" <*> v .:  "releases" <*> v .:  "allowed_push_targets" <*> v .:  "active" <*> v .:  "name" <*> v .:  "version" <*> v .:  "short" <*> v .:  "product"

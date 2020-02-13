@@ -26,6 +26,7 @@ source-repository head
 
 library
   exposed-modules:     Distribution.Fedora
+                       Distribution.Fedora.Branch
   other-modules:       Distribution.Fedora.Products
 
   build-depends:       base >= 4.6 && < 5

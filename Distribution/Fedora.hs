@@ -15,26 +15,30 @@
 
 module Distribution.Fedora
   (Dist(..),
-   dists,
    distBranch,
    distContainer,
    distRepo,
    distUpdates,
    distOverride,
-   getReleases,
-   getProductReleases,
-   getRelease,
-   Release(..),
+   --getReleases,
+   getReleaseIds,
+   --getFedoraReleases,
+   getFedoraReleaseIds,
+   getFedoraDists,
+   --getEPELReleases,
+   getEPELReleaseIds,
+   getRawhideDist,
+   getLatestFedoraDist,
+   getLatestEPELDist,
+   rawhideVersionId,
    kojicmd,
    mockConfig,
-   releaseVersion,
-   rawhide,
-   rawhideRelease,
+   distVersion,
    rpkg,
    rpmDistTag) where
 
 import Control.Monad
-import Data.List
+import qualified Data.Text as T
 import Data.Text (Text)
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Data.Version
@@ -50,14 +54,14 @@ import Control.Applicative ((<$>), (*>))
 import Data.Traversable (traverse)
 #endif
 
-import Distribution.Fedora.Products hiding (releaseVersion)
+import Distribution.Fedora.Products
 
 -- | The `Dist` datatype specifies the target OS and version.
 -- (roughly corresponds to a git branch)
-data Dist = Fedora Int -- ^ Fedora release
+data Dist = RHEL Version -- ^ RHEL version
           | EPEL Int -- ^ EPEL release
-          | RHEL Version -- ^ RHEL version
-  deriving (Eq)
+          | Fedora Int -- ^ Fedora release
+  deriving (Eq, Ord)
 
 instance Show Dist where
   show (Fedora n) = "f" ++ show n
@@ -93,61 +97,107 @@ getProductsFile = do
 getReleases :: IO [Release]
 getReleases = do
   file <- getProductsFile
-  productsResults <$> parse file
+  reverse . productsResults <$> parse file
+
+getReleaseIds :: IO [Text]
+getReleaseIds = map releaseProductVersionId <$> getReleases
 
 getProductReleases :: Text -> IO [Release]
 getProductReleases name =
   filter (\p -> releaseProduct p == name) <$> getReleases
 
-getRelease :: Text -> IO (Maybe Release)
-getRelease pv =
-  find (\p -> releaseProductVersionId p == pv) <$> getReleases
+-- getRelease :: Text -> IO (Maybe Release)
+-- getRelease pv =
+--   find (\p -> releaseProductVersionId p == pv) <$> getReleases
+
+getFedoraReleases :: IO [Release]
+getFedoraReleases =
+  getProductReleases (T.pack "Fedora")
+
+getFedoraReleaseIds :: IO [Text]
+getFedoraReleaseIds =
+  map releaseProductVersionId <$> getFedoraReleases
+
+getEPELReleases :: IO [Release]
+getEPELReleases =
+  getProductReleases (T.pack "EPEL")
+
+getEPELReleaseIds :: IO [Text]
+getEPELReleaseIds =
+  map releaseProductVersionId <$> getEPELReleases
+
+rawhideVersionId :: Text
+rawhideVersionId = T.pack "fedora-rawhide"
+
+-- FIXME fails on rawhide
+releaseMajorVersion :: Release -> Int
+releaseMajorVersion = read . show . releaseVersion
+
+releaseDist :: Release -> Dist
+releaseDist = Fedora . releaseMajorVersion
+
+releaseDists :: [Release] -> [Dist]
+releaseDists rels =
+  map mkDist rels
+  where
+    mkDist :: Release -> Dist
+    mkDist r | releaseProductVersionId r == rawhideVersionId = newerDist latestbranch
+             | otherwise = releaseDist r
+
+    latestbranch = maximum $ filter (\p -> releaseProductVersionId p /= rawhideVersionId) rels
+
+    newerDist = Fedora . (+ 1) . releaseMajorVersion
+
+getFedoraDists :: IO [Dist]
+getFedoraDists = releaseDists <$> getFedoraReleases
+
+getRawhideDist :: IO Dist
+getRawhideDist =
+  head . releaseDists <$> getFedoraReleases
+
+getLatestFedoraDist :: IO Dist
+getLatestFedoraDist =
+  releaseDist . maximum . filter (\p -> releaseProductVersionId p /= rawhideVersionId) <$> getFedoraReleases
+
+getLatestEPELDist :: IO Dist
+getLatestEPELDist =
+  EPEL . releaseMajorVersion . maximum <$> getEPELReleases
 
 -- activeRelease :: Text -> IO Bool
 -- activeRelease pv = do
 --   res <- filter (\p -> releaseProductVersionId p == pv) <$> getReleases
 --   return $ not (null res)
 
--- | Current maintained distribution releases.
-dists :: [Dist]
-dists = [rawhide, Fedora 31, Fedora 30, EPEL 8, EPEL 7]
-
--- | The Fedora release number corresponding to current Rawhide
-rawhideRelease :: Int
-rawhideRelease = 32
-
--- | The Fedora release corresponding to Rawhide
-rawhide :: Dist
-rawhide = Fedora rawhideRelease
-
 -- | Maps `Dist` to package distgit branch
-distBranch :: Dist -> String
-distBranch (Fedora n) | n >= rawhideRelease = "master"
-distBranch d = show d
+distBranch :: Dist -> Dist -> String
+distBranch branch (Fedora n) | Fedora n > branch = "master"
+distBranch _ d = show d
 
 -- | Map `Dist` to DNF/YUM repo name
-distRepo :: Dist -> String
-distRepo (Fedora n) | n >= rawhideRelease = "rawhide"
-                    | otherwise = "fedora"
-distRepo (EPEL _) = "epel"
-distRepo (RHEL _) = "rhel"
+distRepo :: Dist -> Dist -> String
+distRepo branched (Fedora n) | Fedora n > branched = "rawhide"
+                             | otherwise = "fedora"
+distRepo _ (EPEL _) = "epel"
+distRepo _ (RHEL _) = "rhel"
 
 -- | Map `Dist` to Maybe the DNF/YUM updates repo name
-distUpdates :: Dist -> Maybe String
-distUpdates (Fedora n) | n >= rawhideRelease = Nothing
-distUpdates (Fedora _) = Just "updates"
-distUpdates _ = Nothing
+distUpdates :: Dist -> Dist -> Maybe String
+distUpdates branched (Fedora n) | Fedora n > branched  = Nothing
+distUpdates _ (Fedora _) = Just "updates"
+distUpdates _ _ = Nothing
 
 -- | Whether dist has overrides in Bodhi
-distOverride :: Dist -> Bool
-distOverride d = d `notElem` [rawhide, Fedora 32 , EPEL 9]
+distOverride :: Dist -> Dist -> Bool
+distOverride branch (Fedora n) = Fedora n <= branch
+distOverride _ (EPEL n) = n < 9
+distOverride _ _ = False
 
 -- | OS release major version for `Dist`
-releaseVersion :: Dist -> String
-releaseVersion (Fedora n) | n >= rawhideRelease = "rawhide"
-releaseVersion (Fedora n) = show n
-releaseVersion (EPEL n) = show n
-releaseVersion (RHEL n) = show n
+distVersion :: Dist -> Dist -> String
+distVersion branch (Fedora n) | Fedora n > branch = "rawhide"
+distVersion _ (Fedora n) = show n
+distVersion _ (EPEL n) = show n
+distVersion _ (RHEL n) = show n
 
 -- | `Dist` tag (appended to rpm package release field)
 rpmDistTag :: Dist -> String
@@ -166,14 +216,14 @@ rpkg (RHEL _) = "rhpkg"
 rpkg _ = "fedpkg"
 
 -- | Mock configuration for `Dist` and arch
-mockConfig :: Dist -> String -> String
-mockConfig dist arch =
+mockConfig :: Dist -> Dist -> String -> String
+mockConfig branch dist arch =
   let prefix =
         case dist of
           Fedora _ -> "fedora"
-          _ -> distRepo dist
+          _ -> distRepo branch dist
   in
-  prefix ++ "-" ++ releaseVersion dist ++ "-" ++ arch
+  prefix ++ "-" ++ distVersion branch dist ++ "-" ++ arch
 
 -- | Map `Dist` to a container image
 distContainer :: Dist -> String
