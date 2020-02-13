@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE DeriveGeneric       #-}
+{-# LANGUAGE CPP               #-}
 
 module Distribution.Fedora.Products
   ( Release(..)
@@ -13,9 +14,16 @@ import           Control.Monad      (mzero)
 import           Data.Aeson(eitherDecode, Value(..), FromJSON(..), ToJSON(..),
                             pairs,
                             (.:), (.:?), (.=), object)
+#if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,13,0))
+#else
 import           Data.Monoid((<>))
+#endif
 import           Data.Text (Text)
 import qualified GHC.Generics
+#if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
+#else
+import Control.Applicative ((<$>), (<*>), pure)
+#endif
 
 data Release = Release {
     releaseProductVersionId :: Text,
@@ -36,7 +44,6 @@ instance FromJSON Release where
   parseJSON (Object v) = Release <$> v .:  "product_version_id" <*> v .:  "releases" <*> v .:  "allowed_push_targets" <*> v .:  "active" <*> v .:  "name" <*> v .:  "version" <*> v .:  "short" <*> v .:  "product"
   parseJSON _          = mzero
 
-
 instance ToJSON Release where
   toJSON     Release {..} = object ["product_version_id" .= releaseProductVersionId, "releases" .= releaseReleases, "allowed_push_targets" .= releaseAllowedPushTargets, "active" .= releaseActive, "name" .= releaseName, "version" .= releaseVersion, "short" .= releaseShort, "product" .= releaseProduct]
   toEncoding Release {..} = pairs  ("product_version_id" .= releaseProductVersionId<>"releases" .= releaseReleases<>"allowed_push_targets" .= releaseAllowedPushTargets<>"active" .= releaseActive<>"name" .= releaseName<>"version" .= releaseVersion<>"short" .= releaseShort<>"product" .= releaseProduct)
@@ -49,11 +56,9 @@ data ProductReleases = ProductReleases {
     productsPrevious :: Maybe Value
   } deriving (Show,Eq,GHC.Generics.Generic)
 
-
 instance FromJSON ProductReleases where
   parseJSON (Object v) = ProductReleases <$> v .:? "next" <*> v .:  "results" <*> v .:  "count" <*> v .:? "previous"
   parseJSON _          = mzero
-
 
 instance ToJSON ProductReleases where
   toJSON     ProductReleases {..} = object ["next" .= productsNext, "results" .= productsResults, "count" .= productsCount, "previous" .= productsPrevious]
