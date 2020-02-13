@@ -131,7 +131,7 @@ rawhideVersionId = T.pack "fedora-rawhide"
 
 -- FIXME fails on rawhide
 releaseMajorVersion :: Release -> Int
-releaseMajorVersion = read . show . releaseVersion
+releaseMajorVersion = read . T.unpack . releaseVersion
 
 releaseDist :: Release -> Dist
 releaseDist = Fedora . releaseMajorVersion
