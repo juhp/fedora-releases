@@ -34,7 +34,7 @@ library
                      , bytestring
                      , directory
                      , filepath
-                     , simple-cmd
+                     , process
                      , text
                      , time
 

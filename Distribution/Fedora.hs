@@ -42,9 +42,9 @@ import qualified Data.Text as T
 import Data.Text (Text)
 import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Data.Version
-import SimpleCmd (cmd_)
 import System.Directory
 import System.FilePath ((</>))
+import System.Process (rawSystem)
 import Text.Read
 import Text.ParserCombinators.ReadP (char, eof, string)
 
@@ -91,7 +91,7 @@ getProductsFile = do
       return $ diffUTCTime t ts < 20000
     else return False
   unless recent $
-    cmd_ "curl" ["--silent", "--show-error", "-o", file, "https://pdc.fedoraproject.org/rest_api/v1/product-versions/?active=true"]
+    void $ rawSystem "curl" ["--silent", "--show-error", "-o", file, "https://pdc.fedoraproject.org/rest_api/v1/product-versions/?active=true"]
   return file
 
 getReleases :: IO [Release]
