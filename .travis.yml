@@ -1,5 +1,5 @@
-language: haskell
 dist: bionic
+language: haskell
 cabal: "2.4"
 
 branches:
