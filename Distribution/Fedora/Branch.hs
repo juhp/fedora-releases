@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE CPP               #-}
 
 module Distribution.Fedora.Branch
   ( readBranch
@@ -11,7 +12,14 @@ module Distribution.Fedora.Branch
   )
 where
 
-import Control.Applicative ((<|>))
+import Control.Applicative (
+                             (<|>)
+#if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
+#else
+                           , (<$>)
+#endif
+                           )
+
 import Data.Char (isDigit)
 import qualified Data.Text as T
 

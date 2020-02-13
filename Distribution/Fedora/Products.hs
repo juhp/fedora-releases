@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE DeriveGeneric       #-}
-{-# LANGUAGE CPP               #-}
+{-# LANGUAGE CPP                 #-}
 
 module Distribution.Fedora.Products
   ( Release(..)
@@ -22,7 +22,7 @@ import           Data.Text (Text)
 import qualified GHC.Generics
 #if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
 #else
-import Control.Applicative ((<$>), (<*>), pure)
+import Control.Applicative ((<$>), (<*>))
 #endif
 
 data Release = Release {
