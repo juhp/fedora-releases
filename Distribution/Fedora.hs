@@ -112,7 +112,7 @@ getProductReleases name =
 
 getFedoraReleases :: IO [Release]
 getFedoraReleases =
-  getProductReleases (T.pack "Fedora")
+  getProductReleases (T.pack "fedora")
 
 getFedoraReleaseIds :: IO [Text]
 getFedoraReleaseIds =
@@ -120,7 +120,7 @@ getFedoraReleaseIds =
 
 getEPELReleases :: IO [Release]
 getEPELReleases =
-  getProductReleases (T.pack "EPEL")
+  getProductReleases (T.pack "epel")
 
 getEPELReleaseIds :: IO [Text]
 getEPELReleaseIds =
