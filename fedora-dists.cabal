@@ -5,7 +5,8 @@ synopsis:            Library for Fedora distribution versions
 description:
             This library provides the Dist datatype and various associated
             metadata functions for Red Hat distributions (Fedora, EPEL, RHEL)
-            needed for packaging development and building.
+            needed for packaging development and building. It uses current
+            releasedata from Fedora PDC. Also provides a Branch type.
 homepage:            https://github.com/juhp/fedora-dists
 bug-reports:         https://github.com/juhp/fedora-dists/issues
 license:             GPL-3
