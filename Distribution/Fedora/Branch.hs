@@ -67,7 +67,7 @@ releaseBranch :: T.Text -> Branch
 releaseBranch "fedora-rawhide" = Master
 releaseBranch rel | "fedora-" `T.isPrefixOf` rel =
                       let (_,ver) = T.breakOnEnd "-" rel in
-                        Fedora $ read . show $ ver
+                        Fedora $ read . T.unpack $ ver
                   | otherwise = error' $ "Unsupport release: " ++ T.unpack rel
 
 getFedoraBranches :: IO [Branch]
