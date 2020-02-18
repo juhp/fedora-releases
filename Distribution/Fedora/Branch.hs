@@ -28,13 +28,16 @@ import Distribution.Fedora (getFedoraReleaseIds)
 data Branch = Fedora Int | Master
   deriving (Eq, Ord)
 
-readBranch :: String -> Maybe Branch
-readBranch bs = readBranch' bs <|> error' ("Unknown branch " ++ bs)
+readBranch :: [Branch] -> String -> Maybe Branch
+readBranch active bs = readBranch' active bs <|> error' ("Unknown or inactive branch " ++ bs)
 
-readBranch' :: String -> Maybe Branch
-readBranch' "master" = Just Master
-readBranch' ('f':ns) | all isDigit ns && ((read ns :: Int) `elem` [30,31]) = Just $ Fedora (read ns)
-readBranch' _ = Nothing
+readBranch' :: [Branch] -> String -> Maybe Branch
+readBranch' _ "master" = Just Master
+readBranch' active ('f':ns) | all isDigit ns =
+                                let br = Fedora (read ns) in
+                                  if br `elem` active then Just br
+                                  else Nothing
+readBranch' _ _ = Nothing
 
 instance Show Branch where
   show Master = "master"
