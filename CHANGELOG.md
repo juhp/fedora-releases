@@ -2,7 +2,7 @@
 
 `fedora-dists` uses [PVP Versioning](https://pvp.haskell.org).
 
-## 2.0.0 (2020-02-xx)
+## 2.0.0 (2020-03-xx)
 - new IO-based Dist API under Distribution.Fedora:
   without Fedora version hardcoding
 - caches current releases from
