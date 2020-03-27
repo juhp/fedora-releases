@@ -20,7 +20,6 @@ module Distribution.Fedora.Branch
   , readBranch'
   , branchDestTag
   , newerBranch
-  , releaseBranch
   , getFedoraBranches
   )
 where
@@ -34,6 +33,7 @@ import Control.Applicative (
                            )
 
 import Data.Char (isDigit)
+import Data.Maybe (mapMaybe)
 import qualified Data.Text as T
 
 import Distribution.Fedora (getFedoraReleaseIds)
@@ -89,16 +89,16 @@ newerBranch branches (Fedora n) =
 --olderBranch (Fedora n) = Fedora (n-1)
 
 -- | Maps release-id to Branch
-releaseBranch :: T.Text -> Branch
-releaseBranch "fedora-rawhide" = Master
+releaseBranch :: T.Text -> Maybe Branch
+releaseBranch "fedora-rawhide" = Nothing
 releaseBranch rel | "fedora-" `T.isPrefixOf` rel =
                       let (_,ver) = T.breakOnEnd "-" rel in
-                        Fedora $ read . T.unpack $ ver
+                        Just . Fedora . read . T.unpack $ ver
                   | otherwise = error' $ "Unsupport release: " ++ T.unpack rel
 
 -- | Returns list of active Fedora branches
 getFedoraBranches :: IO [Branch]
-getFedoraBranches = map releaseBranch <$> getFedoraReleaseIds
+getFedoraBranches = mapMaybe releaseBranch <$> getFedoraReleaseIds
 
 -- from simple-cmd
 error' :: String -> a
