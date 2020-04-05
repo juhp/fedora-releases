@@ -54,7 +54,7 @@ readBranch active bs = readBranch' active bs <|> error' ("Unknown or inactive br
 --
 -- Like readBranch but does not give an error for inactive or unknown branches.
 readBranch' :: [Branch] -> String -> Maybe Branch
-readBranch' _ "master" = Just Master
+readBranch' active "master" = if Master `elem` active then Just Master else Nothing
 readBranch' active ('f':ns) | all isDigit ns =
                                 let br = Fedora (read ns) in
                                   if br `elem` active then Just br
