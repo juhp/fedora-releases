@@ -1,6 +1,5 @@
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE OverloadedStrings   #-}
-{-# LANGUAGE DeriveGeneric       #-}
 {-# LANGUAGE CPP                 #-}
 
 module Distribution.Fedora.Products
@@ -19,7 +18,6 @@ import           Data.Aeson(eitherDecode, Value(..), FromJSON(..), ToJSON(..),
 import           Data.Monoid((<>))
 #endif
 import           Data.Text (Text)
-import qualified GHC.Generics
 #if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
 #else
 import Control.Applicative ((<$>), (<*>))
@@ -34,7 +32,7 @@ data Release = Release {
     releaseVersion :: Text,
     releaseShort :: Text,
     releaseProduct :: Text
-  } deriving (Show,Eq,GHC.Generics.Generic)
+  } deriving (Show,Eq)
 
 instance Ord Release where
   compare r1 r2 =
@@ -54,7 +52,7 @@ data ProductReleases = ProductReleases {
     productsResults :: [Release],
     productsCount :: Int,
     productsPrevious :: Maybe Value
-  } deriving (Show,Eq,GHC.Generics.Generic)
+  } deriving (Show,Eq)
 
 instance FromJSON ProductReleases where
   parseJSON (Object v) = ProductReleases <$> v .:? "next" <*> v .:  "results" <*> v .:  "count" <*> v .:? "previous"
