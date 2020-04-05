@@ -21,6 +21,7 @@ module Distribution.Fedora.Branch
   , branchDestTag
   , newerBranch
   , getFedoraBranches
+  , getFedoraBranched
   )
 where
 
@@ -98,6 +99,10 @@ getFedoraBranches = map releaseBranch <$> getFedoraReleaseIds
                           let (_,ver) = T.breakOnEnd "-" rel in
                             Fedora $ read . T.unpack $ ver
                       | otherwise = error' $ "Unsupport release: " ++ T.unpack rel
+
+-- | Returns list of active Fedora branches, excluding master
+getFedoraBranched :: IO [Branch]
+getFedoraBranched = filter (/= Master) <$> getFedoraBranches
 
 -- from simple-cmd
 error' :: String -> a
