@@ -51,7 +51,7 @@ data Branch = Fedora Int | Master
 eitherBranch :: String -> Either String Branch
 eitherBranch "master" = Right Master
 eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
-eitherBranch _ = Left "unknown Fedora branch"
+eitherBranch cs = Left $ "unknown Fedora branch: " ++ cs
 
 -- | Read a Fedora Branch name
 readBranch :: String -> Maybe Branch
@@ -72,11 +72,11 @@ readBranch' bs =
 -- Provides error strings for inactive or unknown branches.
 eitherActiveBranch :: [Branch] -> String -> Either String Branch
 eitherActiveBranch active bs =
-  case readBranch bs of
-    Just br -> if br `elem` active
-               then Right br
-               else Left ("inactive Fedora branch: " ++ bs)
-    Nothing -> Left $ "unknown Fedora branch: " ++ bs
+  case eitherBranch bs of
+    Left e -> Left e
+    Right br -> if br `elem` active
+                then Right br
+                else Left $ "inactive Fedora branch: " ++ bs
 
 -- | Read a Branch name (one of the list of active branches)
 --
