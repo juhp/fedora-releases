@@ -18,6 +18,10 @@ module Distribution.Fedora.Branch
   ( Branch(..)
   , readBranch
   , readBranch'
+  , eitherBranch
+  , readActiveBranch
+  , readActiveBranch'
+  , eitherActiveBranch
   , branchDestTag
   , newerBranch
   , getFedoraBranches
@@ -43,26 +47,54 @@ import Distribution.Fedora (getFedoraReleaseIds)
 data Branch = Fedora Int | Master
   deriving (Eq, Ord)
 
--- | Read a Branch name (one of the list of active branches)
---
--- Gives an error for an old (inactive) or unknown branch,
--- for clearer error message from optparse-applicative etc.
-readBranch :: [Branch] -> String -> Branch
-readBranch active bs =
-  case readBranch' active bs of
-    Just br -> br
-    Nothing -> error' ("Unknown or inactive branch " ++ bs)
+-- | Read a Fedora Branch name
+eitherBranch :: String -> Either String Branch
+eitherBranch "master" = Right Master
+eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
+eitherBranch _ = Left "unknown Fedora branch"
+
+-- | Read a Fedora Branch name
+readBranch :: String -> Maybe Branch
+readBranch bs =
+  case eitherBranch bs of
+    Left _ -> Nothing
+    Right br -> Just br
+
+-- | Unsafely read a Fedora Branch name: errors for unknown branches
+readBranch' :: String -> Branch
+readBranch' bs =
+  case eitherBranch bs of
+    Left e -> error' e
+    Right br -> br
 
 -- | Read a Branch name (one of the list of active branches)
 --
--- Like readBranch but does not give an error for inactive or unknown branches.
-readBranch' :: [Branch] -> String -> Maybe Branch
-readBranch' active "master" = if Master `elem` active then Just Master else Nothing
-readBranch' active ('f':ns) | all isDigit ns =
-                                let br = Fedora (read ns) in
-                                  if br `elem` active then Just br
-                                  else Nothing
-readBranch' _ _ = Nothing
+-- Provides error strings for inactive or unknown branches.
+eitherActiveBranch :: [Branch] -> String -> Either String Branch
+eitherActiveBranch active bs =
+  case readBranch bs of
+    Just br -> if br `elem` active
+               then Right br
+               else Left ("inactive Fedora branch: " ++ bs)
+    Nothing -> Left $ "unknown Fedora branch: " ++ bs
+
+-- | Read a Branch name (one of the list of active branches)
+--
+-- Similar to eitherActiceBranch but ignores any error string
+readActiveBranch :: [Branch] -> String -> Maybe Branch
+readActiveBranch active cs =
+  case eitherActiveBranch active cs of
+    Left _ -> Nothing
+    Right br -> Just br
+
+-- | Read a Branch name (one of the list of active branches)
+--
+-- Like readActiveBranch, but errors for inactive or unknown branches.
+readActiveBranch' :: [Branch] -> String -> Branch
+readActiveBranch' active cs =
+  case eitherActiveBranch active cs of
+    Left e -> error' e
+    Right br -> br
 
 instance Show Branch where
   show Master = "master"
