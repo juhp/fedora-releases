@@ -25,13 +25,12 @@ module Distribution.Fedora.Branch
   )
 where
 
-import Control.Applicative (
-                             (<|>)
 #if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
 #else
-                           , (<$>)
-#endif
+import Control.Applicative (
+                           (<$>)
                            )
+#endif
 
 import Data.Char (isDigit)
 import qualified Data.Text as T
@@ -48,8 +47,11 @@ data Branch = Fedora Int | Master
 --
 -- Gives an error for an old (inactive) or unknown branch,
 -- for clearer error message from optparse-applicative etc.
-readBranch :: [Branch] -> String -> Maybe Branch
-readBranch active bs = readBranch' active bs <|> error' ("Unknown or inactive branch " ++ bs)
+readBranch :: [Branch] -> String -> Branch
+readBranch active bs =
+  case readBranch' active bs of
+    Just br -> br
+    Nothing -> error' ("Unknown or inactive branch " ++ bs)
 
 -- | Read a Branch name (one of the list of active branches)
 --
