@@ -130,7 +130,7 @@ newerBranch branches (EPEL n) =
 --olderBranch Master = latestBranch
 --olderBranch (Fedora n) = Fedora (n-1)
 
--- | Returns list of active Fedora branches, including master
+-- | Returns list of active Fedora branches, including master and EPEL
 getFedoraBranches :: IO [Branch]
 getFedoraBranches = map releaseBranch <$> getReleaseIds
   where
