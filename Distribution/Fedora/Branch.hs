@@ -24,6 +24,7 @@ module Distribution.Fedora.Branch
   , eitherActiveBranch
   , branchDestTag
   , newerBranch
+  , releaseBranch
   , getFedoraBranches
   , getFedoraBranched
   )
@@ -133,17 +134,17 @@ newerBranch branches (EPEL n) =
 -- | Returns list of active Fedora branches, including master and EPEL
 getFedoraBranches :: IO [Branch]
 getFedoraBranches = map releaseBranch <$> getReleaseIds
-  where
-    -- | Maps release-id to Branch
-    releaseBranch :: T.Text -> Branch
-    releaseBranch "fedora-rawhide" = Master
-    releaseBranch rel | "fedora-" `T.isPrefixOf` rel =
-                          let (_,ver) = T.breakOnEnd "-" rel in
-                            Fedora $ read . T.unpack $ ver
-                      | "epel-" `T.isPrefixOf` rel =
-                          let (_,ver) = T.breakOnEnd "-" rel in
-                            EPEL $ read . T.unpack $ ver
-                      | otherwise = error' $ "Unsupport release: " ++ T.unpack rel
+
+-- | Maps release-id to Branch
+releaseBranch :: T.Text -> Branch
+releaseBranch "fedora-rawhide" = Master
+releaseBranch rel | "fedora-" `T.isPrefixOf` rel =
+                      let (_,ver) = T.breakOnEnd "-" rel in
+                        Fedora $ read . T.unpack $ ver
+                  | "epel-" `T.isPrefixOf` rel =
+                      let (_,ver) = T.breakOnEnd "-" rel in
+                        EPEL $ read . T.unpack $ ver
+                  | otherwise = error' $ "Unsupport release: " ++ T.unpack rel
 
 -- | Returns list of active Fedora branches, excluding master
 getFedoraBranched :: IO [Branch]
