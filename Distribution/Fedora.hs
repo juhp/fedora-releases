@@ -78,7 +78,10 @@ instance Read Dist where
 getProductsFile :: IO FilePath
 getProductsFile = do
   home <- getHomeDirectory
-  let file = home </> ".fedora/product-versions.json"
+  let dir = home </> ".fedora"
+  dirExists <- doesDirectoryExist dir
+  unless dirExists $ createDirectory dir
+  let file = dir </> "product-versions.json"
   recent <- do
     have <- doesFileExist file
     if have then do
