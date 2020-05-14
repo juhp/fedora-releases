@@ -22,20 +22,19 @@ module Distribution.Fedora.Branch
   , readActiveBranch
   , readActiveBranch'
   , eitherActiveBranch
-  , branchDestTag
   , newerBranch
   , releaseBranch
   , getFedoraBranches
   , getFedoraBranched
+  , branchDestTag
   , branchDist
+  , branchTarget
   )
 where
 
 #if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
 #else
-import Control.Applicative (
-                           (<$>)
-                           )
+import Control.Applicative ((<$>))
 #endif
 
 import Data.Char (isDigit)
@@ -110,6 +109,12 @@ branchDestTag Master = "rawhide"
 branchDestTag (Fedora n) = show (Fedora n) ++ "-updates-candidate"
 branchDestTag (EPEL n) = show (Fedora n) ++ "-candidate"
 
+-- | Default build target associated with a branch
+branchTarget :: Branch -> String
+branchTarget (Fedora n) = show (Fedora n)
+branchTarget (EPEL n) = show (EPEL n)
+branchTarget Master = "rawhide"
+
 --getLatestBranch :: IO Branch
 
 -- | Returns newer branch than given one from supplied active branches.
@@ -159,6 +164,7 @@ error' = errorWithoutStackTrace
 error' = error
 #endif
 
+-- | Convert a Branch to a Dist
 branchDist :: Branch -> IO Dist.Dist
 branchDist (Fedora n) = return $ Dist.Fedora n
 branchDist (EPEL n) = return $ Dist.EPEL n
