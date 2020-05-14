@@ -27,6 +27,7 @@ module Distribution.Fedora.Branch
   , releaseBranch
   , getFedoraBranches
   , getFedoraBranched
+  , branchDist
   )
 where
 
@@ -40,7 +41,7 @@ import Control.Applicative (
 import Data.Char (isDigit)
 import qualified Data.Text as T
 
-import Distribution.Fedora (getReleaseIds)
+import qualified Distribution.Fedora as Dist
 
 -- | Branch datatype
 --
@@ -133,7 +134,7 @@ newerBranch branches (EPEL n) =
 
 -- | Returns list of active Fedora branches, including master and EPEL
 getFedoraBranches :: IO [Branch]
-getFedoraBranches = map releaseBranch <$> getReleaseIds
+getFedoraBranches = map releaseBranch <$> Dist.getReleaseIds
 
 -- | Maps release-id to Branch
 releaseBranch :: T.Text -> Branch
@@ -157,3 +158,8 @@ error' = errorWithoutStackTrace
 #else
 error' = error
 #endif
+
+branchDist :: Branch -> IO Dist.Dist
+branchDist (Fedora n) = return $ Dist.Fedora n
+branchDist (EPEL n) = return $ Dist.EPEL n
+branchDist Master = Dist.getRawhideDist
