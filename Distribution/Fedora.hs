@@ -227,8 +227,8 @@ mockConfig branch dist arch =
 -- | `Dist` tag (appended to rpm package release field)
 rpmDistTag :: Dist -> String
 rpmDistTag (Fedora n) = ".fc" ++ show n
+rpmDistTag (EPEL n) = ".el" ++ show n
 rpmDistTag (RHEL v) = ".el" ++ (show . head . versionBranch) v
-rpmDistTag d = '.' : show d
 
 -- | Command line tool for `Dist` (eg "koji")
 kojicmd :: Dist -> String
