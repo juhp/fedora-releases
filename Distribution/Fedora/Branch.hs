@@ -107,7 +107,7 @@ instance Show Branch where
 branchDestTag :: Branch -> String
 branchDestTag Master = "rawhide"
 branchDestTag (Fedora n) = show (Fedora n) ++ "-updates-candidate"
-branchDestTag (EPEL n) = show (EPEL n) ++ "-candidate"
+branchDestTag (EPEL n) = show (EPEL n) ++ "-testing-candidate"
 
 -- | Default build target associated with a branch
 branchTarget :: Branch -> String
