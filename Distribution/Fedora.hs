@@ -91,7 +91,7 @@ getProductsFile = do
       return $ diffUTCTime t ts < 20000
     else return False
   unless recent $
-    void $ rawSystem "curl" ["--silent", "--show-error", "-o", file, "https://pdc.fedoraproject.org/rest_api/v1/product-versions/?active=true"]
+    void $ rawSystem "curl" ["--silent", "--fail", "--show-error", "-o", file, "https://pdc.fedoraproject.org/rest_api/v1/product-versions/?active=true"]
   return file
 
 getReleases :: IO [Release]
