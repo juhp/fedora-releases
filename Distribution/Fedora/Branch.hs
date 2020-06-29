@@ -118,15 +118,15 @@ branchTarget Master = "rawhide"
 --getLatestBranch :: IO Branch
 
 -- | Returns newer branch than given one from supplied active branches.
-newerBranch :: [Branch] -> Branch -> Branch
-newerBranch _ Master = Master
-newerBranch branches (Fedora n) =
+newerBranch :: Branch -> [Branch] -> Branch
+newerBranch Master _ = Master
+newerBranch (Fedora n) branches =
   if Fedora n `elem` branches
   then if Fedora (n+1) `elem` branches
        then Fedora (n+1)
        else Master
   else error' $ "Unsupported branch: " ++ show (Fedora n)
-newerBranch branches (EPEL n) =
+newerBranch (EPEL n) branches =
   if EPEL n `elem` branches
   then if EPEL (n+1) `elem` branches
        then EPEL (n+1)
