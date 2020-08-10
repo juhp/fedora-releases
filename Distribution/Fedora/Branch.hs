@@ -53,7 +53,7 @@ eitherBranch :: String -> Either String Branch
 eitherBranch "master" = Right Master
 eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
 eitherBranch ('e':'p':'e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
-eitherBranch cs = Left $ "unknown Fedora branch: " ++ cs
+eitherBranch cs = Left cs
 
 -- | Read a Fedora Branch name
 readBranch :: String -> Maybe Branch
@@ -66,7 +66,7 @@ readBranch bs =
 readBranch' :: String -> Branch
 readBranch' bs =
   case eitherBranch bs of
-    Left e -> error' e
+    Left e -> error' $ "unknown Fedora branch: " ++ e
     Right br -> br
 
 -- | Read a Branch name (one of the list of active branches)
@@ -78,7 +78,7 @@ eitherActiveBranch active bs =
     Left e -> Left e
     Right br -> if br `elem` active
                 then Right br
-                else Left $ "inactive Fedora branch: " ++ bs
+                else Left bs
 
 -- | Read a Branch name (one of the list of active branches)
 --
@@ -95,7 +95,7 @@ readActiveBranch active cs =
 readActiveBranch' :: [Branch] -> String -> Branch
 readActiveBranch' active cs =
   case eitherActiveBranch active cs of
-    Left e -> error' e
+    Left e -> error' $ "inactive Fedora branch: " ++ e
     Right br -> br
 
 instance Show Branch where
