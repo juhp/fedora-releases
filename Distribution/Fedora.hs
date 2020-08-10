@@ -34,14 +34,9 @@ module Distribution.Fedora
    rpkg,
    rpmDistTag) where
 
-import Control.Monad
 import qualified Data.Text as T
 import Data.Text (Text)
-import Data.Time.Clock (diffUTCTime, getCurrentTime)
 import Data.Version
-import System.Directory
-import System.FilePath ((</>))
-import System.Process (rawSystem)
 import Text.Read
 import Text.ParserCombinators.ReadP (char, eof, string)
 
@@ -50,6 +45,7 @@ import Control.Applicative ((<$>), (*>))
 import Data.Traversable (traverse)
 #endif
 
+import Distribution.Fedora.ReadProducts
 import Distribution.Fedora.Products
 
 -- | The `Dist` datatype specifies the target OS and version.
@@ -73,25 +69,6 @@ instance Read Dist where
       v <- string "rhel-" >> parseVersion
       eof
       return v)
-
-getProductsFile :: IO FilePath
-getProductsFile = do
-  home <- getHomeDirectory
-  let dir = home </> ".fedora"
-  dirExists <- doesDirectoryExist dir
-  unless dirExists $ createDirectory dir
-  let file = dir </> "product-versions.json"
-  recent <- do
-    have <- doesFileExist file
-    if have then do
-      ts <- getModificationTime file
-      t <- getCurrentTime
-      -- about 5.5 hours
-      return $ diffUTCTime t ts < 20000
-    else return False
-  unless recent $
-    void $ rawSystem "curl" ["--silent", "--fail", "--show-error", "-o", file, "https://pdc.fedoraproject.org/rest_api/v1/product-versions/?active=true"]
-  return file
 
 getReleases :: IO [Release]
 getReleases = do

@@ -29,13 +29,14 @@ library
   exposed-modules:     Distribution.Fedora
                        Distribution.Fedora.Branch
   other-modules:       Distribution.Fedora.Products
+                       Distribution.Fedora.ReadProducts
 
   build-depends:       base >= 4.6 && < 5
                      , aeson
                      , bytestring
                      , directory
                      , filepath
-                     , process
+                     , pdc
                      , text
                      , time
 

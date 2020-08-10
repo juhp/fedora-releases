@@ -1,1 +1,6 @@
 resolver: lts-15.16
+extra-deps:
+  - git: https://github.com/juhp/simple-query.git
+    commit: c23eadb370e5341facd4716044e3ae70a0a4ceab
+  - git: https://github.com/juhp/pdc-hs.git
+    commit: dd11d4f55da4d56d3e6f1467af891ace40014d05
