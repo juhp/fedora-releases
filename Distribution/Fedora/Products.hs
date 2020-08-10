@@ -8,18 +8,16 @@ module Distribution.Fedora.Products
   )
 where
 
-import qualified Data.ByteString.Lazy.Char8 as BSL
+import qualified Data.ByteString.Lazy.Char8 as BL
 import           Control.Monad      (mzero)
 import           Data.Aeson(eitherDecode, Value(..), FromJSON(..), ToJSON(..),
                             pairs,
                             (.:), (.:?), (.=), object)
-#if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,13,0))
-#else
+#if !MIN_VERSION_base(4,13,0)
 import           Data.Monoid((<>))
 #endif
 import           Data.Text (Text)
-#if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
-#else
+#if !MIN_VERSION_base(4,8,0)
 import Control.Applicative ((<$>), (<*>))
 #endif
 
@@ -65,7 +63,7 @@ instance ToJSON ProductReleases where
 
 parseReleases :: FilePath -> IO [Release]
 parseReleases filename = do
-    input <- BSL.readFile filename
+    input <- BL.readFile filename
     case eitherDecode input of
       Left  err -> error $ "Invalid JSON file: " ++ filename ++ "\n" ++ err
       Right r   -> return $ productsResults r
