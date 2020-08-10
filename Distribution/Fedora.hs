@@ -29,7 +29,6 @@ module Distribution.Fedora
    distOverride,
    mockConfig,
    distVersion,
-   distContainer,
    kojicmd,
    rpkg,
    rpmDistTag) where
@@ -215,9 +214,3 @@ kojicmd _ =  "koji"
 rpkg :: Dist -> String
 rpkg (RHEL _) = "rhpkg"
 rpkg _ = "fedpkg"
-
--- | Map `Dist` to a container image
-distContainer :: Dist -> String
-distContainer (Fedora n) = "fedora:" ++ show n
-distContainer (EPEL n) = "centos:" ++ show n
-distContainer (RHEL n) = "ubi" ++ show n ++ "/ubi"
