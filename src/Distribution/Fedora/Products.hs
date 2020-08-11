@@ -12,7 +12,7 @@ import qualified Data.ByteString.Lazy.Char8 as BL
 import           Control.Monad      (mzero)
 import           Data.Aeson(eitherDecode, Value(..), FromJSON(..), ToJSON(..),
                             pairs,
-                            (.:), (.:?), (.=), object)
+                            (.:), (.=), object)
 #if !MIN_VERSION_base(4,13,0)
 import           Data.Monoid((<>))
 #endif
@@ -44,26 +44,9 @@ instance ToJSON Release where
   toJSON     Release {..} = object ["product_version_id" .= releaseProductVersionId, "releases" .= releaseReleases, "allowed_push_targets" .= releaseAllowedPushTargets, "active" .= releaseActive, "name" .= releaseName, "version" .= releaseVersion, "short" .= releaseShort, "product" .= releaseProduct]
   toEncoding Release {..} = pairs  ("product_version_id" .= releaseProductVersionId<>"releases" .= releaseReleases<>"allowed_push_targets" .= releaseAllowedPushTargets<>"active" .= releaseActive<>"name" .= releaseName<>"version" .= releaseVersion<>"short" .= releaseShort<>"product" .= releaseProduct)
 
-
-data ProductReleases = ProductReleases {
-    productsNext :: Maybe Value,
-    productsResults :: [Release],
-    productsCount :: Int,
-    productsPrevious :: Maybe Value
-  } deriving (Show,Eq)
-
-instance FromJSON ProductReleases where
-  parseJSON (Object v) = ProductReleases <$> v .:? "next" <*> v .:  "results" <*> v .:  "count" <*> v .:? "previous"
-  parseJSON _          = mzero
-
-instance ToJSON ProductReleases where
-  toJSON     ProductReleases {..} = object ["next" .= productsNext, "results" .= productsResults, "count" .= productsCount, "previous" .= productsPrevious]
-  toEncoding ProductReleases {..} = pairs  ("next" .= productsNext<>"results" .= productsResults<>"count" .= productsCount<>"previous" .= productsPrevious)
-
-
 parseReleases :: FilePath -> IO [Release]
 parseReleases filename = do
     input <- BL.readFile filename
     case eitherDecode input of
       Left  err -> error $ "Invalid JSON file: " ++ filename ++ "\n" ++ err
-      Right r   -> return $ productsResults r
+      Right r   -> return r

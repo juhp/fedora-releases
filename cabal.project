@@ -8,4 +8,4 @@ source-repository-package
 source-repository-package
     type: git
     location: https://github.com/juhp/pdc-hs.git
-    tag: d87a136336b68d30a02694783f7607fb17e9f97b
+    tag: c8747e722616407a987322bef9a299328a3fde55
