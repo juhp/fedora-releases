@@ -30,6 +30,7 @@ library
                        Distribution.Fedora.Branch
   other-modules:       Distribution.Fedora.Products
                        Distribution.Fedora.ReadProducts
+  hs-source-dirs:      src
 
   build-depends:       base >= 4.6 && < 5
                      , aeson
