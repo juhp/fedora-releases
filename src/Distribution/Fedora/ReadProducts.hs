@@ -20,7 +20,7 @@ getProductsFile = do
   let dir = home </> ".fedora"
   dirExists <- doesDirectoryExist dir
   unless dirExists $ createDirectory dir
-  let file = dir </> "product-versions.json"
+  let file = dir </> "product-versions-2.json"
   recent <- do
     have <- doesFileExist file
     if have then do
