@@ -19,6 +19,7 @@ module Distribution.Fedora.Branch
   , readBranch
   , readBranch'
   , eitherBranch
+  , eitherBranch'
   , readActiveBranch
   , readActiveBranch'
   , eitherActiveBranch
@@ -48,12 +49,18 @@ import qualified Distribution.Fedora as Dist
 data Branch = EPEL Int | Fedora Int | Master
   deriving (Eq, Ord)
 
--- | Read a Fedora Branch name
+-- | Read a Fedora Branch name, otherwise return branch string
 eitherBranch :: String -> Either String Branch
 eitherBranch "master" = Right Master
 eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
 eitherBranch ('e':'p':'e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
 eitherBranch cs = Left cs
+
+-- | Read a Fedora Branch name, otherwise return an error message
+eitherBranch' :: String -> Either String Branch
+eitherBranch' cs = case eitherBranch cs of
+  Right br -> Right br
+  Left xs -> Left $ xs ++ " is not a known Fedora/EPEL branch"
 
 -- | Read a Fedora Branch name
 readBranch :: String -> Maybe Branch
