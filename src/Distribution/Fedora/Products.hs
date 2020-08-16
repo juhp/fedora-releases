@@ -3,7 +3,7 @@
 {-# LANGUAGE CPP                 #-}
 
 module Distribution.Fedora.Products
-  ( Release(..)
+  ( Release(releaseProductVersionId,releaseVersion,releaseProduct)
   , parseReleases
   )
 where
