@@ -40,8 +40,7 @@ library
                      , pdc
                      , text
                      , time
-  if impl(ghc < 8)
-    build-depends:     transformers
+
   ghc-options:         -Wall
   if impl(ghc >= 8.0)
     ghc-options:       -Wcompat
