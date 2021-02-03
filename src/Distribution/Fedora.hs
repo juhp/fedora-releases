@@ -156,11 +156,11 @@ getLatestEPELDist =
 
 -- | Maps `Dist` to package dist-git branch name, relative to latest branch
 --
--- > distBranch (Fedora 32) (Fedora 33) == "master"
+-- > distBranch (Fedora 32) (Fedora 33) == "rawhide"
 -- > distBranch (Fedora 32) (Fedora 31) == "f31"
 distBranch :: Dist -- ^ latest branch
            -> Dist -> String
-distBranch branch (Fedora n) | Fedora n > branch = "master"
+distBranch branch (Fedora n) | Fedora n > branch = "rawhide"
 distBranch _ d = show d
 
 -- | Map `Dist` to DNF/YUM repo name, relative to latest branch

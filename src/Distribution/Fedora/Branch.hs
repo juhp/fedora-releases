@@ -45,13 +45,14 @@ import qualified Distribution.Fedora as Dist
 
 -- | Branch datatype
 --
--- Branch can be master, or a fedora or epel branch
-data Branch = EPEL Int | Fedora Int | Master
+-- Branch can be rawhide, or a fedora or epel branch
+data Branch = EPEL Int | Fedora Int | Rawhide
   deriving (Eq, Ord)
 
 -- | Read a Fedora Branch name, otherwise return branch string
 eitherBranch :: String -> Either String Branch
-eitherBranch "master" = Right Master
+eitherBranch "rawhide" = Right Rawhide
+eitherBranch "main" = Right Rawhide
 eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
 eitherBranch ('e':'p':'e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
 eitherBranch cs = Left cs
@@ -106,13 +107,13 @@ readActiveBranch' active cs =
     Right br -> br
 
 instance Show Branch where
-  show Master = "master"
+  show Rawhide = "rawhide"
   show (Fedora n) = "f" ++ show n
   show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
 
 -- | Map Branch to Koji destination tag
 branchDestTag :: Branch -> String
-branchDestTag Master = "rawhide"
+branchDestTag Rawhide = "rawhide"
 branchDestTag (Fedora n) = show (Fedora n) ++ "-updates-candidate"
 branchDestTag (EPEL n) = show (EPEL n) ++ "-testing-candidate"
 
@@ -120,18 +121,18 @@ branchDestTag (EPEL n) = show (EPEL n) ++ "-testing-candidate"
 branchTarget :: Branch -> String
 branchTarget (Fedora n) = show (Fedora n)
 branchTarget (EPEL n) = show (EPEL n)
-branchTarget Master = "rawhide"
+branchTarget Rawhide = "rawhide"
 
 --getLatestBranch :: IO Branch
 
 -- | Returns newer branch than given one from supplied active branches.
 newerBranch :: Branch -> [Branch] -> Branch
-newerBranch Master _ = Master
+newerBranch Rawhide _ = Rawhide
 newerBranch (Fedora n) branches =
   if Fedora n `elem` branches
   then if Fedora (n+1) `elem` branches
        then Fedora (n+1)
-       else Master
+       else Rawhide
   else error' $ "Unsupported branch: " ++ show (Fedora n)
 newerBranch (EPEL n) branches =
   if EPEL n `elem` branches
@@ -141,16 +142,16 @@ newerBranch (EPEL n) branches =
   else error' $ "Unsupported branch: " ++ show (EPEL n)
 
 --olderBranch :: Branch -> Branch
---olderBranch Master = latestBranch
+--olderBranch Rawhide = latestBranch
 --olderBranch (Fedora n) = Fedora (n-1)
 
--- | Returns list of active Fedora branches, including master and EPEL
+-- | Returns list of active Fedora branches, including rawhide and EPEL
 getFedoraBranches :: IO [Branch]
 getFedoraBranches = map releaseBranch <$> Dist.getReleaseIds
 
 -- | Maps release-id to Branch
 releaseBranch :: T.Text -> Branch
-releaseBranch "fedora-rawhide" = Master
+releaseBranch "fedora-rawhide" = Rawhide
 releaseBranch rel | "fedora-" `T.isPrefixOf` rel =
                       let (_,ver) = T.breakOnEnd "-" rel in
                         Fedora $ read . T.unpack $ ver
@@ -159,9 +160,9 @@ releaseBranch rel | "fedora-" `T.isPrefixOf` rel =
                         EPEL $ read . T.unpack $ ver
                   | otherwise = error' $ "Unsupport release: " ++ T.unpack rel
 
--- | Returns list of active Fedora branches, excluding master
+-- | Returns list of active Fedora branches, excluding rawhide
 getFedoraBranched :: IO [Branch]
-getFedoraBranched = filter (/= Master) <$> getFedoraBranches
+getFedoraBranched = filter (/= Rawhide) <$> getFedoraBranches
 
 -- from simple-cmd
 error' :: String -> a
@@ -175,4 +176,4 @@ error' = error
 branchDist :: Branch -> IO Dist.Dist
 branchDist (Fedora n) = return $ Dist.Fedora n
 branchDist (EPEL n) = return $ Dist.EPEL n
-branchDist Master = Dist.getRawhideDist
+branchDist Rawhide = Dist.getRawhideDist
