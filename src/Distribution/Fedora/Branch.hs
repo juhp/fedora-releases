@@ -126,6 +126,8 @@ branchTarget Rawhide = "rawhide"
 --getLatestBranch :: IO Branch
 
 -- | Returns newer branch than given one from supplied active branches.
+--
+-- Branches should be in descending order, eg from getFedoraBranches
 newerBranch :: Branch -> [Branch] -> Branch
 newerBranch Rawhide _ = Rawhide
 newerBranch (Fedora n) branches =
