@@ -52,7 +52,6 @@ data Branch = EPEL Int | Fedora Int | Rawhide
 -- | Read a Fedora Branch name, otherwise return branch string
 eitherBranch :: String -> Either String Branch
 eitherBranch "rawhide" = Right Rawhide
-eitherBranch "main" = Right Rawhide
 eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
 eitherBranch ('e':'p':'e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
 eitherBranch cs = Left cs
