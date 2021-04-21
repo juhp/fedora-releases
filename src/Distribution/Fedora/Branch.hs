@@ -54,7 +54,7 @@ eitherBranch :: String -> Either String Branch
 eitherBranch "rawhide" = Right Rawhide
 eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
 eitherBranch ('e':'p':'e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
-eitherBranch "el5" = Right (EPEL 5)
+eitherBranch ('e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
 eitherBranch cs = Left cs
 
 -- | Read a Fedora Branch name, otherwise return an error message
