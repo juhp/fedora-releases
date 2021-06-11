@@ -74,7 +74,7 @@ readBranch bs =
 readBranch' :: String -> Branch
 readBranch' bs =
   case eitherBranch bs of
-    Left e -> error' $ "unknown Fedora branch: " ++ e
+    Left e -> error' $! "unknown Fedora branch: " ++ e
     Right br -> br
 
 -- | Read a Branch name (one of the list of active branches)
