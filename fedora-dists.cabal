@@ -28,8 +28,8 @@ source-repository head
 library
   exposed-modules:     Distribution.Fedora
                        Distribution.Fedora.Branch
-  other-modules:       Distribution.Fedora.Products
-                       Distribution.Fedora.ReadProducts
+  other-modules:       Distribution.Fedora.Release
+                       Distribution.Fedora.Products
   hs-source-dirs:      src
 
   build-depends:       base >= 4.6 && < 5
@@ -38,6 +38,7 @@ library
                      , directory
                      , filepath
                      , pdc
+                     , cached-json-file
                      , text
                      , time
 

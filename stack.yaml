@@ -1,7 +1,9 @@
-resolver: lts-16.25
+resolver: lts-16.31
 extra-deps:
   # - git: https://github.com/juhp/http-query.git
   #   commit: 95bfbbfde4c1ea1862fc4ed03bd5f0635253486e
   - http-query-0.1.0
   - git: https://github.com/juhp/pdc-hs.git
     commit: d7e59cedf72f4253b10b1c723dd0b9e27fa11688
+  - git: https://github.com/juhp/cached-json-file.git
+    commit: 993d81c3fd1588c9bbc90483e6ce8ccda33fb4ef

@@ -90,7 +90,7 @@ eitherActiveBranch active bs =
 
 -- | Read a Branch name (one of the list of active branches)
 --
--- Similar to eitherActiceBranch but ignores any error string
+-- Similar to eitherActiveBranch but ignores any error string
 readActiveBranch :: [Branch] -> String -> Maybe Branch
 readActiveBranch active cs =
   case eitherActiveBranch active cs of

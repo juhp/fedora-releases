@@ -33,6 +33,7 @@ module Distribution.Fedora
    rpkg,
    rpmDistTag) where
 
+import Data.Maybe
 import qualified Data.Text as T
 import Data.Text (Text)
 import Data.Version
@@ -44,8 +45,8 @@ import Control.Applicative ((<$>), (*>))
 import Data.Traversable (traverse)
 #endif
 
-import Distribution.Fedora.ReadProducts
 import Distribution.Fedora.Products
+import Distribution.Fedora.Release
 
 -- | The `Dist` datatype specifies the target OS and version.
 -- (roughly corresponds to a git branch)
@@ -70,9 +71,7 @@ instance Read Dist where
       return v)
 
 getReleases :: IO [Release]
-getReleases = do
-  file <- getProductsFile
-  reverse <$> parseReleases file
+getReleases = reverse . mapMaybe readRelease <$> getProducts
 
 -- | gets list of current releases (Fedora and EPEL)
 --
