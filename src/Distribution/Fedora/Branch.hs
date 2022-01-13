@@ -155,11 +155,15 @@ getFedoraBranches = map releaseBranch <$> Dist.getReleaseIds
 releaseBranch :: T.Text -> Branch
 releaseBranch "fedora-rawhide" = Rawhide
 releaseBranch rel | "fedora-" `T.isPrefixOf` rel =
-                      let (_,ver) = T.breakOnEnd "-" rel in
-                        Fedora $ read . T.unpack $ ver
+                      let (_,ver) = T.unpack <$> T.breakOnEnd "-" rel in
+                        if all isDigit ver
+                        then Fedora $ read ver
+                        else error' $ "Unsupport release: " ++ T.unpack rel
                   | "epel-" `T.isPrefixOf` rel =
-                      let (_,ver) = T.breakOnEnd "-" rel in
-                        EPEL $ read . T.unpack $ ver
+                      let (_,ver) = T.unpack <$> T.breakOnEnd "-" rel in
+                        if all isDigit ver
+                        then EPEL $ read ver
+                        else error' $ "Unsupport release: " ++ T.unpack rel
                   | otherwise = error' $ "Unsupport release: " ++ T.unpack rel
 
 -- | Returns list of active Fedora branches, excluding rawhide
