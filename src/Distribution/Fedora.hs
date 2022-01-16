@@ -2,7 +2,7 @@
 
 -- |
 -- Module      :  Distribution.Fedora
--- Copyright   :  (C) 2014-2020  Jens Petersen
+-- Copyright   :  (C) 2014-2021  Jens Petersen
 --
 -- Maintainer  :  Jens Petersen <petersen@fedoraproject.org>
 --
@@ -60,7 +60,7 @@ instance Show Dist where
   show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
   show (RHEL v) = "rhel-" ++ showVersion v
 
--- | Read from eg "f29", "epel7"
+-- | Read from eg "f35", "epel8"
 instance Read Dist where
   readPrec = choice [pFedora, pEPEL, pRHEL] where
     pFedora = Fedora <$> (lift (char 'f') *> readPrec)
@@ -155,8 +155,8 @@ getLatestEPELDist =
 
 -- | Maps `Dist` to package dist-git branch name, relative to latest branch
 --
--- > distBranch (Fedora 32) (Fedora 33) == "rawhide"
--- > distBranch (Fedora 32) (Fedora 31) == "f31"
+-- > distBranch (Fedora 35) (Fedora 36) == "rawhide"
+-- > distBranch (Fedora 35) (Fedora 34) == "f34"
 distBranch :: Dist -- ^ latest branch
            -> Dist -> String
 distBranch branch (Fedora n) | Fedora n > branch = "rawhide"

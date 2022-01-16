@@ -2,13 +2,13 @@
 
 `fedora-dists` uses [PVP Versioning](https://pvp.haskell.org).
 
-## 2.0.0 (2020-03-xx)
-- new IO-based Dist API under Distribution.Fedora:
+## 2.0.0 (2022-01-17)
+- Distribution.Fedora: new IO-based Dist API
   without Fedora version hardcoding
 - caches current releases from
   https://pdc.fedoraproject.org/rest_api/v1/product-versions/
   under ~/.fedora/
-- Distribution.Fedora.Branch provides Branch type taken from juhp/fedbrnch
+- Distribution.Fedora.Branch provides Branch type taken from juhp/fbrnch
 
 ## 1.1.2 (2020-01-24)
 - mockConfig rawhide version

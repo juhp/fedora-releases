@@ -3,7 +3,7 @@
 
 -- |
 -- Module      :  Distribution.Fedora.Branch
--- Copyright   :  (C) 2020  Jens Petersen
+-- Copyright   :  (C) 2020-2022  Jens Petersen
 --
 -- Maintainer  :  Jens Petersen <petersen@fedoraproject.org>
 --
