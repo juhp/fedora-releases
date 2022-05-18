@@ -2,6 +2,10 @@
 
 `fedora-dists` uses [PVP Versioning](https://pvp.haskell.org).
 
+## 2.1.0 (2022-05-18)
+- add epel-next to Dist and Branch (juhp/fbrnch#29)
+- remove obsolete deps on bytestring and time
+
 ## 2.0.0 (2022-01-17)
 - Distribution.Fedora: new IO-based Dist API
   without Fedora version hardcoding
