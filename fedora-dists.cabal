@@ -1,6 +1,6 @@
 cabal-version:       1.18
 name:                fedora-dists
-version:             2.0.0
+version:             2.1.0
 synopsis:            Library for Fedora distribution versions
 description:
             This library provides the Dist datatype and various associated

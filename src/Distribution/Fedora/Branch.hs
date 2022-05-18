@@ -46,13 +46,16 @@ import qualified Distribution.Fedora as Dist
 -- | Branch datatype
 --
 -- Branch can be rawhide, or a fedora or epel branch
-data Branch = EPEL Int | Fedora Int | Rawhide
+data Branch = EPEL Int | EPELNext Int | Fedora Int | Rawhide
   deriving (Eq, Ord)
 
 -- | Read a Fedora Branch name, otherwise return branch string
 eitherBranch :: String -> Either String Branch
 eitherBranch "rawhide" = Right Rawhide
 eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
+-- FIXME add proper parsing:
+eitherBranch "epel8-next" = Right $ EPELNext 8
+eitherBranch "epel9-next" = Right $ EPELNext 9
 eitherBranch ('e':'p':'e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
 eitherBranch ('e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
 eitherBranch cs = Left cs
@@ -110,17 +113,20 @@ instance Show Branch where
   show Rawhide = "rawhide"
   show (Fedora n) = "f" ++ show n
   show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
+  show (EPELNext n) = "epel" ++ show n ++ "-next"
 
 -- | Map Branch to Koji destination tag
 branchDestTag :: Branch -> String
 branchDestTag Rawhide = "rawhide"
 branchDestTag (Fedora n) = show (Fedora n) ++ "-updates-candidate"
 branchDestTag (EPEL n) = show (EPEL n) ++ "-testing-candidate"
+branchDestTag (EPELNext n) = show (EPELNext n) ++ "-testing-candidate"
 
 -- | Default build target associated with a branch
 branchTarget :: Branch -> String
 branchTarget (Fedora n) = show (Fedora n)
 branchTarget (EPEL n) = show (EPEL n)
+branchTarget (EPELNext n) = show (EPELNext n)
 branchTarget Rawhide = "rawhide"
 
 --getLatestBranch :: IO Branch
@@ -142,6 +148,12 @@ newerBranch (EPEL n) branches =
        then EPEL (n+1)
        else EPEL n
   else error' $ "Unsupported branch: " ++ show (EPEL n)
+newerBranch (EPELNext n) branches =
+  if EPELNext n `elem` branches
+  then if EPELNext (n+1) `elem` branches
+       then EPELNext (n+1)
+       else EPELNext n
+  else error' $ "Unsupported branch: " ++ show (EPELNext n)
 
 --olderBranch :: Branch -> Branch
 --olderBranch Rawhide = latestBranch
@@ -182,4 +194,5 @@ error' = error
 branchDist :: Branch -> IO Dist.Dist
 branchDist (Fedora n) = return $ Dist.Fedora n
 branchDist (EPEL n) = return $ Dist.EPEL n
+branchDist (EPELNext n) = return $ Dist.EPELNext n
 branchDist Rawhide = Dist.getRawhideDist

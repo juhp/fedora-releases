@@ -52,18 +52,21 @@ import Distribution.Fedora.Release
 -- (roughly corresponds to a git branch)
 data Dist = RHEL Version -- ^ RHEL version
           | EPEL Int -- ^ EPEL release
+          | EPELNext Int -- ^ EPEL Next release
           | Fedora Int -- ^ Fedora release
   deriving (Eq, Ord)
 
 instance Show Dist where
   show (Fedora n) = "f" ++ show n
   show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
+  show (EPELNext n) = "epel" ++ show n ++ "-next"
   show (RHEL v) = "rhel-" ++ showVersion v
 
 -- | Read from eg "f35", "epel8"
 instance Read Dist where
-  readPrec = choice [pFedora, pEPEL, pRHEL] where
+  readPrec = choice [pFedora, pEPELNext, pEPEL, pRHEL] where
     pFedora = Fedora <$> (lift (char 'f') *> readPrec)
+    pEPELNext = EPELNext <$> (lift (string "epel") *> readPrec <* lift (string "-next"))
     pEPEL = EPEL <$> (lift (string "epel") *> readPrec)
     pRHEL = RHEL <$> lift (do
       v <- string "rhel-" >> parseVersion
@@ -167,6 +170,7 @@ distRepo :: Dist -> Dist -> String
 distRepo branched (Fedora n) | Fedora n > branched = "rawhide"
                              | otherwise = "fedora"
 distRepo _ (EPEL _) = "epel"
+distRepo _ (EPELNext _) = "epel-next"
 distRepo _ (RHEL _) = "rhel"
 
 -- | Map `Dist` to Maybe the DNF/YUM updates repo name, relative to latest branch
@@ -178,7 +182,8 @@ distUpdates _ _ = Nothing
 -- | Whether dist has overrides in Bodhi, relative to latest branch
 distOverride :: Dist -> Dist -> Bool
 distOverride branch (Fedora n) = Fedora n <= branch
-distOverride _ (EPEL n) = n < 9
+distOverride _ (EPEL n) = n < 10
+distOverride _ (EPELNext n) = n < 10
 distOverride _ _ = False
 
 -- | OS release major version for `Dist`, relative to latest branch
@@ -186,6 +191,7 @@ distVersion :: Dist -> Dist -> String
 distVersion branch (Fedora n) | Fedora n > branch = "rawhide"
 distVersion _ (Fedora n) = show n
 distVersion _ (EPEL n) = show n
+distVersion _ (EPELNext n) = show n
 distVersion _ (RHEL n) = show n
 
 -- | Mock configuration for `Dist` and arch, relative to latest branch
@@ -202,6 +208,7 @@ mockConfig branch dist arch =
 rpmDistTag :: Dist -> String
 rpmDistTag (Fedora n) = ".fc" ++ show n
 rpmDistTag (EPEL n) = ".el" ++ show n
+rpmDistTag (EPELNext n) = ".el" ++ show n
 rpmDistTag (RHEL v) = ".el" ++ (show . head . versionBranch) v
 
 -- | Command line tool for `Dist` (eg "koji")
