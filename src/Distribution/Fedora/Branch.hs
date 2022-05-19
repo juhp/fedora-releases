@@ -161,7 +161,11 @@ newerBranch (EPELNext n) branches =
 
 -- | Returns list of active Fedora branches, including rawhide and EPEL
 getFedoraBranches :: IO [Branch]
-getFedoraBranches = map releaseBranch <$> Dist.getReleaseIds
+getFedoraBranches = do
+  -- FIXME get these from Bodhi Releases?
+  let epelnext = [EPELNext 8, EPELNext 9]
+  brs <- map releaseBranch <$> Dist.getReleaseIds
+  return $ brs ++ epelnext
 
 -- | Maps release-id to Branch
 releaseBranch :: T.Text -> Branch
