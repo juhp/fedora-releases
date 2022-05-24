@@ -2,6 +2,11 @@
 
 `fedora-dists` uses [PVP Versioning](https://pvp.haskell.org).
 
+## 2.1.1 (2022-05-24)
+epel-next fixes (juhp/fbrnch#29):
+- Branch: getFedoraBranches now includes epel-8-next and epel-9-next
+- Dist: fix rpmDistTag for epel-next
+
 ## 2.1.0 (2022-05-18)
 - add epel-next to Dist and Branch (juhp/fbrnch#29)
 - remove obsolete deps on bytestring and time
