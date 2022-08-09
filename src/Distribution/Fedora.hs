@@ -50,10 +50,10 @@ import Distribution.Fedora.Release
 
 -- | The `Dist` datatype specifies the target OS and version.
 -- (roughly corresponds to a git branch)
-data Dist = RHEL Version -- ^ RHEL version
-          | EPEL Int -- ^ EPEL release
-          | EPELNext Int -- ^ EPEL Next release
-          | Fedora Int -- ^ Fedora release
+data Dist = RHEL !Version -- ^ RHEL version
+          | EPEL !Int -- ^ EPEL release
+          | EPELNext !Int -- ^ EPEL Next release
+          | Fedora !Int -- ^ Fedora release
   deriving (Eq, Ord)
 
 instance Show Dist where
