@@ -33,6 +33,7 @@ module Distribution.Fedora
    rpkg,
    rpmDistTag) where
 
+import Data.Char (isDigit)
 import Data.Maybe
 import qualified Data.Text as T
 import Data.Text (Text)
@@ -113,9 +114,13 @@ getEPELReleaseIds =
 rawhideVersionId :: Text
 rawhideVersionId = T.pack "fedora-rawhide"
 
--- fails on rawhide - only use on other releases
+-- fails on rawhide (and also "f37";) - only use on branched releases
 releaseMajorVersion :: Release -> Int
-releaseMajorVersion = read . T.unpack . releaseVersion
+releaseMajorVersion r =
+  let rel = T.unpack . releaseVersion $ r
+  in if all isDigit rel
+     then read rel
+     else error $ "invalid release number: " ++ rel
 
 releaseDist :: Release -> Dist
 releaseDist = Fedora . releaseMajorVersion
