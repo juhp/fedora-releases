@@ -46,7 +46,7 @@ import qualified Distribution.Fedora as Dist
 -- | Branch datatype
 --
 -- Branch can be rawhide, or a fedora or epel branch
-data Branch = EPEL Int | EPELNext Int | Fedora Int | Rawhide
+data Branch = EPEL !Int | EPELNext !Int | Fedora !Int | Rawhide
   deriving (Eq, Ord)
 
 -- | Read a Fedora Branch name, otherwise return branch string
