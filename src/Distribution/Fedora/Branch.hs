@@ -1,5 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE CPP               #-}
+{-# LANGUAGE CPP, OverloadedStrings #-}
 
 -- |
 -- Module      :  Distribution.Fedora.Branch
@@ -30,6 +29,7 @@ module Distribution.Fedora.Branch
   , branchDestTag
   , branchDist
   , branchTarget
+  , partitionBranches
   )
 where
 
@@ -39,7 +39,9 @@ import Control.Applicative ((<$>))
 #endif
 
 import Data.Char (isDigit)
+import Data.Either (partitionEithers)
 import qualified Data.Text as T
+import Data.Tuple (swap)
 
 import qualified Distribution.Fedora as Dist
 
@@ -200,3 +202,8 @@ branchDist (Fedora n) = return $ Dist.Fedora n
 branchDist (EPEL n) = return $ Dist.EPEL n
 branchDist (EPELNext n) = return $ Dist.EPELNext n
 branchDist Rawhide = Dist.getRawhideDist
+
+-- | separate fedora branches from rest of args
+partitionBranches :: [String] -> ([Branch],[String])
+partitionBranches args =
+  swap . partitionEithers $ map eitherBranch args
