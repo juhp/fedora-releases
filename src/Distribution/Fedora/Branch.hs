@@ -2,7 +2,7 @@
 
 -- |
 -- Module      :  Distribution.Fedora.Branch
--- Copyright   :  (C) 2020-2022  Jens Petersen
+-- Copyright   :  (C) 2020-2022,2024  Jens Petersen
 --
 -- Maintainer  :  Jens Petersen <petersen@fedoraproject.org>
 --
@@ -26,24 +26,26 @@ module Distribution.Fedora.Branch
   , releaseBranch
   , getFedoraBranches
   , getFedoraBranched
+  , getLatestFedoraBranch
   , branchDestTag
-  , branchDist
+  , branchDistTag
+  , branchRelease
   , branchTarget
   , partitionBranches
   )
 where
 
-#if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,8,0))
-#else
+#if !MIN_VERSION_base(4,8,0)
 import Control.Applicative ((<$>))
 #endif
 
 import Data.Char (isDigit)
 import Data.Either (partitionEithers)
-import qualified Data.Text as T
+import Data.List (delete)
+import Data.Maybe (mapMaybe)
 import Data.Tuple (swap)
 
-import qualified Distribution.Fedora as Dist
+import Distribution.Fedora.Release
 
 -- | Branch datatype
 --
@@ -117,6 +119,15 @@ instance Show Branch where
   show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
   show (EPELNext n) = "epel" ++ show n ++ "-next"
 
+-- | Get Release associated with release Branch
+branchRelease :: Branch -> IO Release
+branchRelease br = do
+  rels <- getReleases
+  case releaseFilter releaseBranch (== show br) rels of
+    [] -> error' $ "release not found for branch " ++ show br
+    [rel] -> return rel
+    rs -> error' $ "impossible happened: multiple releases for " ++ show br ++ ":\n" ++ unwords (map releaseBranch rs)
+
 -- | Map Branch to Koji destination tag
 branchDestTag :: Branch -> String
 branchDestTag Rawhide = "rawhide"
@@ -124,14 +135,21 @@ branchDestTag (Fedora n) = show (Fedora n) ++ "-updates-candidate"
 branchDestTag (EPEL n) = show (EPEL n) ++ "-testing-candidate"
 branchDestTag (EPELNext n) = show (EPELNext n) ++ "-testing-candidate"
 
+-- | Get %dist tag for branch
+branchDistTag :: Branch -> IO String
+branchDistTag Rawhide = do
+  n <- releaseVersion <$> branchRelease Rawhide
+  branchDistTag (Fedora (read n))
+branchDistTag (Fedora n) = return $ ".fc" ++ show n
+branchDistTag (EPEL n) = return $ ".el" ++ show n
+branchDistTag (EPELNext n) = return $ ".el" ++ show n ++ ".next"
+
 -- | Default build target associated with a branch
 branchTarget :: Branch -> String
 branchTarget (Fedora n) = show (Fedora n)
 branchTarget (EPEL n) = show (EPEL n)
 branchTarget (EPELNext n) = show (EPELNext n)
 branchTarget Rawhide = "rawhide"
-
---getLatestBranch :: IO Branch
 
 -- | Returns newer branch than given one from supplied active branches.
 --
@@ -163,47 +181,35 @@ newerBranch (EPELNext n) branches =
 
 -- | Returns list of active Fedora branches, including rawhide and EPEL
 getFedoraBranches :: IO [Branch]
-getFedoraBranches = do
-  -- FIXME get these from Bodhi Releases?
-  let epelnext = [EPELNext 8, EPELNext 9]
-  brs <- map releaseBranch <$> Dist.getReleaseIds
-  return $ brs ++ epelnext
+getFedoraBranches =
+  mapMaybe (readBranch . releaseBranch) <$> getReleases
 
--- | Maps release-id to Branch
-releaseBranch :: T.Text -> Branch
-releaseBranch "fedora-rawhide" = Rawhide
-releaseBranch rel | "fedora-" `T.isPrefixOf` rel =
-                      let (_,ver) = T.unpack <$> T.breakOnEnd "-" rel in
-                        if all isDigit ver
-                        then Fedora $ read ver
-                        else error' $ "Unsupport release: " ++ T.unpack rel
-                  | "epel-" `T.isPrefixOf` rel =
-                      let (_,ver) = T.unpack <$> T.breakOnEnd "-" rel in
-                        if all isDigit ver
-                        then EPEL $ read ver
-                        else error' $ "Unsupport release: " ++ T.unpack rel
-                  | otherwise = error' $ "Unsupport release: " ++ T.unpack rel
+-- | Maps Release to Branch
+releaseToBranch :: Release -> Branch
+releaseToBranch = readBranch' . releaseBranch
 
 -- | Returns list of active Fedora branches, excluding rawhide
 getFedoraBranched :: IO [Branch]
-getFedoraBranched = filter (/= Rawhide) <$> getFedoraBranches
+getFedoraBranched = delete Rawhide <$> getFedoraBranches
 
 -- from simple-cmd
 error' :: String -> a
-#if (defined(MIN_VERSION_base) && MIN_VERSION_base(4,9,0))
+#if MIN_VERSION_base(4,9,0)
 error' = errorWithoutStackTrace
 #else
 error' = error
 #endif
 
--- | Convert a Branch to a Dist
-branchDist :: Branch -> IO Dist.Dist
-branchDist (Fedora n) = return $ Dist.Fedora n
-branchDist (EPEL n) = return $ Dist.EPEL n
-branchDist (EPELNext n) = return $ Dist.EPELNext n
-branchDist Rawhide = Dist.getRawhideDist
-
 -- | separate fedora branches from rest of args
 partitionBranches :: [String] -> ([Branch],[String])
 partitionBranches args =
   swap . partitionEithers $ map eitherBranch args
+
+-- | get newest Fedora branched Release
+getLatestFedoraBranch :: IO Branch
+getLatestFedoraBranch =
+  releaseToBranch . maximum . releaseFilter releaseBranch (/= "rawhide")
+  <$> getFedoraReleases
+
+releaseFilter :: (Release -> a) -> (a -> Bool) -> [Release] -> [Release]
+releaseFilter f p = filter (p . f)
