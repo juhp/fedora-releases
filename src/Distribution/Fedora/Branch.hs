@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP, OverloadedStrings #-}
-
 -- |
 -- Module      :  Distribution.Fedora.Branch
 -- Copyright   :  (C) 2020-2022,2024  Jens Petersen
@@ -34,10 +32,6 @@ module Distribution.Fedora.Branch
   , partitionBranches
   )
 where
-
-#if !MIN_VERSION_base(4,8,0)
-import Control.Applicative ((<$>))
-#endif
 
 import Data.Char (isDigit)
 import Data.Either (partitionEithers)
@@ -194,11 +188,7 @@ getFedoraBranched = delete Rawhide <$> getFedoraBranches
 
 -- from simple-cmd
 error' :: String -> a
-#if MIN_VERSION_base(4,9,0)
 error' = errorWithoutStackTrace
-#else
-error' = error
-#endif
 
 -- | separate fedora branches from rest of args
 partitionBranches :: [String] -> ([Branch],[String])
