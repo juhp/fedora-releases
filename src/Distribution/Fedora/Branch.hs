@@ -14,14 +14,10 @@
 module Distribution.Fedora.Branch
   ( Branch(..)
   , readBranch
-  , readBranch'
   , eitherBranch
-  , eitherBranch'
   , readActiveBranch
-  , readActiveBranch'
   , eitherActiveBranch
   , newerBranch
-  , releaseBranch
   , getFedoraBranches
   , getFedoraBranched
   , getLatestFedoraBranch
@@ -58,11 +54,11 @@ eitherBranch ('e':'p':'e':'l':n) | all isDigit n = let br = EPEL (read n) in Rig
 eitherBranch ('e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
 eitherBranch cs = Left cs
 
--- | Read a Fedora Branch name, otherwise return an error message
-eitherBranch' :: String -> Either String Branch
-eitherBranch' cs = case eitherBranch cs of
-  Right br -> Right br
-  Left xs -> Left $ xs ++ " is not a known Fedora/EPEL branch"
+-- -- | Read a Fedora Branch name, otherwise return an error message
+-- eitherBranch' :: String -> Either String Branch
+-- eitherBranch' cs = case eitherBranch cs of
+--   Right br -> Right br
+--   Left xs -> Left $ xs ++ " is not a known Fedora/EPEL branch"
 
 -- | Read a Fedora Branch name
 readBranch :: String -> Maybe Branch
@@ -71,7 +67,7 @@ readBranch bs =
     Left _ -> Nothing
     Right br -> Just br
 
--- | Unsafely read a Fedora Branch name: errors for unknown branches
+-- Unsafely read a Fedora Branch name: errors for unknown branches
 readBranch' :: String -> Branch
 readBranch' bs =
   case eitherBranch bs of
@@ -97,15 +93,6 @@ readActiveBranch active cs =
   case eitherActiveBranch active cs of
     Left _ -> Nothing
     Right br -> Just br
-
--- | Read a Branch name (one of the list of active branches)
---
--- Like readActiveBranch, but errors for inactive or unknown branches.
-readActiveBranch' :: [Branch] -> String -> Branch
-readActiveBranch' active cs =
-  case eitherActiveBranch active cs of
-    Left e -> error' $ "inactive Fedora branch: " ++ e
-    Right br -> br
 
 instance Show Branch where
   show Rawhide = "rawhide"
