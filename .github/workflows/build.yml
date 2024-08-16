@@ -24,4 +24,6 @@ jobs:
       - run: cabal update
       - run: cabal build
       - run: cabal haddock
+        if: ${{ matrix.ghc != '8.0' }}
+          # failed for zlib
       - run: cabal sdist
