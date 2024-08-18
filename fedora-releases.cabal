@@ -1,9 +1,9 @@
 cabal-version:       1.18
 name:                fedora-releases
-version:             0.1.0
+version:             0.2.0
 synopsis:            Library for Fedora release versions
 description:
-            This library provides the Branch and Release datatypes
+            This library provides the Branch and Release data types
             and various associated metadata functions for
             Fedora releases (Fedora and EPEL) needed for
             packaging development and building.

@@ -31,7 +31,7 @@ where
 
 import Data.Char (isDigit)
 import Data.Either (partitionEithers)
-import Data.List (delete)
+import Data.List (delete, elemIndex)
 import Data.Maybe (mapMaybe)
 import Data.Tuple (swap)
 
@@ -41,7 +41,19 @@ import Distribution.Fedora.Release
 --
 -- Branch can be rawhide, or a fedora or epel branch
 data Branch = EPEL !Int | EPELNext !Int | Fedora !Int | Rawhide
-  deriving (Eq, Ord)
+  deriving (Eq)
+
+instance Ord Branch where
+  compare Rawhide Rawhide = EQ
+  compare (Fedora m) (Fedora n) = compare m n
+  compare (EPELNext m) (EPELNext n) = compare m n
+  compare (EPEL m) (EPEL n) = compare m n
+  compare Rawhide _ = GT
+  compare _ Rawhide = LT
+  compare (Fedora _) _ = GT
+  compare _ (Fedora _) = LT
+  compare (EPEL m) (EPELNext n) = if m == n then LT else compare m n
+  compare (EPELNext m) (EPEL n) = if m == n then GT else compare m n
 
 -- | Read a Fedora Branch name, otherwise return branch string
 eitherBranch :: String -> Either String Branch
@@ -135,26 +147,13 @@ branchTarget Rawhide = "rawhide"
 -- | Returns newer branch than given one from supplied active branches.
 --
 -- Branches should be in descending order, eg from getFedoraBranches
-newerBranch :: Branch -> [Branch] -> Branch
-newerBranch Rawhide _ = Rawhide
-newerBranch (Fedora n) branches =
-  if Fedora n `elem` branches
-  then if Fedora (n+1) `elem` branches
-       then Fedora (n+1)
-       else Rawhide
-  else error' $ "Unsupported branch: " ++ show (Fedora n)
-newerBranch (EPEL n) branches =
-  if EPEL n `elem` branches
-  then if EPEL (n+1) `elem` branches
-       then EPEL (n+1)
-       else EPEL n
-  else error' $ "Unsupported branch: " ++ show (EPEL n)
-newerBranch (EPELNext n) branches =
-  if EPELNext n `elem` branches
-  then if EPELNext (n+1) `elem` branches
-       then EPELNext (n+1)
-       else EPELNext n
-  else error' $ "Unsupported branch: " ++ show (EPELNext n)
+newerBranch :: Branch -> [Branch] -> Maybe Branch
+newerBranch Rawhide _ = Nothing
+newerBranch br branches =
+  case elemIndex br branches of
+    Just i | i > 0 -> Just $ branches !! (i - 1)
+    _ -> Nothing
+
 
 --olderBranch :: Branch -> Branch
 --olderBranch Rawhide = latestBranch
