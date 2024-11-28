@@ -18,8 +18,8 @@ module Distribution.Fedora.Branch
   , readActiveBranch
   , eitherActiveBranch
   , newerBranch
-  , getFedoraBranches
-  , getFedoraBranched
+  , getActiveBranches
+  , getActiveBranched
   , getLatestFedoraBranch
   , branchDestTag
   , branchDistTag
@@ -31,9 +31,11 @@ where
 
 import Data.Char (isDigit)
 import Data.Either (partitionEithers)
-import Data.List (delete, elemIndex)
+import Data.List (delete, elemIndex, sortBy)
 import Data.Maybe (mapMaybe)
+import Data.Ord (comparing, Down(Down))
 import Data.Tuple (swap)
+import Safe (headDef)
 
 import Distribution.Fedora.Release
 
@@ -115,7 +117,7 @@ instance Show Branch where
 -- | Get Release associated with release Branch
 branchRelease :: Branch -> IO Release
 branchRelease br = do
-  rels <- getReleases
+  rels <- getActiveReleases
   case releaseFilter releaseBranch (== show br) rels of
     [] -> error' $ "release not found for branch " ++ show br
     [rel] -> return rel
@@ -159,18 +161,18 @@ newerBranch br branches =
 --olderBranch Rawhide = latestBranch
 --olderBranch (Fedora n) = Fedora (n-1)
 
--- | Returns list of active Fedora branches, including rawhide and EPEL
-getFedoraBranches :: IO [Branch]
-getFedoraBranches =
-  mapMaybe (readBranch . releaseBranch) <$> getReleases
+-- | Returns descending list of active Fedora branches, including rawhide and EPEL
+getActiveBranches :: IO [Branch]
+getActiveBranches =
+  reverseSort . mapMaybe (readBranch . releaseBranch) <$> getActiveReleases
 
 -- | Maps Release to Branch
 releaseToBranch :: Release -> Branch
 releaseToBranch = readBranch' . releaseBranch
 
 -- | Returns list of active Fedora branches, excluding rawhide
-getFedoraBranched :: IO [Branch]
-getFedoraBranched = delete Rawhide <$> getFedoraBranches
+getActiveBranched :: IO [Branch]
+getActiveBranched = delete Rawhide <$> getActiveBranches
 
 -- from simple-cmd
 error' :: String -> a
@@ -184,8 +186,10 @@ partitionBranches args =
 -- | get newest Fedora branched Release
 getLatestFedoraBranch :: IO Branch
 getLatestFedoraBranch =
-  releaseToBranch . maximum . releaseFilter releaseBranch (/= "rawhide")
-  <$> getFedoraReleases
+  headDef (error' "no active branched!") <$> getActiveBranched
 
 releaseFilter :: (Release -> a) -> (a -> Bool) -> [Release] -> [Release]
 releaseFilter f p = filter (p . f)
+
+reverseSort :: Ord a => [a] -> [a]
+reverseSort = sortBy (comparing Down)

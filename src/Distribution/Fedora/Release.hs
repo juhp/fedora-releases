@@ -16,7 +16,7 @@
 
 module Distribution.Fedora.Release
   ( Release(..),
-    getReleases,
+    getActiveReleases,
     getFedoraReleases,
     getEPELReleases
   )
@@ -50,9 +50,9 @@ readRelease obj = do
 
 -- FIXME remove containers and flatpaks
 -- | Get list of all current Fedora Project releases (from Bodhi)
-getReleases :: IO [Release]
-getReleases =
-  reverse . mapMaybe readRelease <$> getBodhiReleases
+getActiveReleases :: IO [Release]
+getActiveReleases =
+  mapMaybe readRelease <$> getBodhiReleases
 
 getProductReleases :: String -> IO [Release]
 getProductReleases name =
