@@ -31,7 +31,7 @@ where
 
 import Data.Char (isDigit)
 import Data.Either (partitionEithers)
-import Data.List (delete, elemIndex, sortBy)
+import Data.List.Extra (delete, elemIndex, replace, sortBy)
 import Data.Maybe (mapMaybe)
 import Data.Ord (comparing, Down(Down))
 import Data.Tuple (swap)
@@ -122,13 +122,14 @@ branchDestTag br = releaseCandidateTag <$> branchRelease br
 
 -- | Get %dist tag for branch
 branchDistTag :: Branch -> IO String
-branchDistTag Rawhide = do
-  n <- releaseVersion <$> branchRelease Rawhide
-  branchDistTag (Fedora (read n))
-branchDistTag (Fedora n) = return $ ".fc" ++ show n
-branchDistTag (EPEL n) = return $ ".el" ++ show n
-branchDistTag (EPELNext n) = return $ ".el" ++ show n ++ ".next"
-
+branchDistTag br = do
+  dist <- releaseDistTag <$> branchRelease br
+  -- f41 -> .fc41
+  -- epel10.0 -> .el10_0
+  return $ '.' : (distroFix br . replace "." "_") dist
+  where
+    distroFix (EPEL _) = replace "epel" "el"
+    distroFix _ = replace "f" "fc"
 
 -- | Returns newer branch than given one from supplied active branches.
 --
