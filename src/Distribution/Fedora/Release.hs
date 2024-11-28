@@ -32,7 +32,15 @@ data Release = Release {
     releaseName :: String,
     releaseVersion :: String,
     releaseIdPrefix :: String,
-    releaseBranch :: String
+    releaseBranch :: String,
+    releaseComposed :: Bool,
+    releaseCandidateTag :: String,
+    releaseDistTag :: String,
+    releaseSettingStatus :: Maybe String,
+    releaseState :: String,
+    releaseAutomaticUpdates :: Bool,
+    releaseTestingRepo :: Maybe String,
+    releaseTestingTag :: String
   } deriving (Show,Eq)
 
 readRelease :: Object -> Maybe Release
@@ -42,7 +50,15 @@ readRelease obj = do
   idPref <- lookupKey "id_prefix" obj
   guard (idPref `notElem` ["FEDORA-CONTAINER","FEDORA-FLATPAK"])
   br <- lookupKey "branch" obj
-  return $ Release name ver idPref br
+  composed <- lookupKey "composed_by_bodhi" obj
+  candidate <- lookupKey "candidate_tag" obj
+  disttag <- lookupKey "dist_tag" obj
+  let setting = lookupKey "setting_status" obj
+  state <- lookupKey "state" obj
+  automatic <- lookupKey "create_automatic_updates" obj
+  let testrepo = lookupKey "testing_repository" obj
+  testtag <- lookupKey "testing_tag" obj
+  return $ Release name ver idPref br composed candidate disttag setting state automatic testrepo testtag
 
 instance Ord Release where
   compare r1 r2 =
