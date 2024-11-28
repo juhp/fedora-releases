@@ -81,13 +81,6 @@ readBranch bs =
     Left _ -> Nothing
     Right br -> Just br
 
--- Unsafely read a Fedora Branch name: errors for unknown branches
-readBranch' :: String -> Branch
-readBranch' bs =
-  case eitherBranch bs of
-    Left e -> error' $! "unknown Fedora branch: " ++ e
-    Right br -> br
-
 -- | Read a Branch name (one of the list of active branches)
 --
 -- Provides error strings for inactive or unknown branches.
@@ -165,10 +158,6 @@ newerBranch br branches =
 getActiveBranches :: IO [Branch]
 getActiveBranches =
   reverseSort . mapMaybe (readBranch . releaseBranch) <$> getActiveReleases
-
--- | Maps Release to Branch
-releaseToBranch :: Release -> Branch
-releaseToBranch = readBranch' . releaseBranch
 
 -- | Returns list of active Fedora branches, excluding rawhide
 getActiveBranched :: IO [Branch]
