@@ -6,6 +6,7 @@ module Distribution.Fedora.BodhiReleases (
   getBodhiProductReleases,
   getBodhiFedoraReleases,
   getBodhiEPELReleases,
+  getBodhiBranchReleases,
   lookupKey
   )
 where
@@ -37,3 +38,7 @@ getBodhiFedoraReleases =
 getBodhiEPELReleases :: IO [Object]
 getBodhiEPELReleases =
   getBodhiProductReleases "FEDORA-EPEL"
+
+getBodhiBranchReleases :: String -> IO [Object]
+getBodhiBranchReleases br =
+  filter (\r -> lookupKey "branch" r == Just br) <$> getBodhiReleases
