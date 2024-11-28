@@ -26,7 +26,6 @@ import Control.Monad (guard)
 import Data.Aeson(Object)
 import Data.Maybe (mapMaybe)
 import Distribution.Fedora.BodhiReleases
-import Fedora.Bodhi (lookupKey)
 
 -- | Fedora Release data
 data Release = Release {

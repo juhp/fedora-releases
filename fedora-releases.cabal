@@ -30,7 +30,7 @@ source-repository head
 library
   exposed-modules:     Distribution.Fedora.Branch
                        Distribution.Fedora.Release
-  other-modules:       Distribution.Fedora.BodhiReleases
+                       Distribution.Fedora.BodhiReleases
   hs-source-dirs:      src
 
   build-depends:       base >= 4.9 && < 5
