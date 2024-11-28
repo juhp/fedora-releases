@@ -71,19 +71,19 @@ getActiveReleases :: IO [Release]
 getActiveReleases =
   mapMaybe readRelease <$> getBodhiReleases
 
-getProductReleases :: String -> IO [Release]
-getProductReleases name =
-  mapMaybe readRelease <$> getBodhiProductReleases name
+-- getProductReleases :: String -> IO [Release]
+-- getProductReleases name =
+--   mapMaybe readRelease <$> getBodhiProductReleases name
 
 -- | Get list of current Fedora Linux releases
 getFedoraReleases :: IO [Release]
 getFedoraReleases =
-  getProductReleases "FEDORA"
+  mapMaybe readRelease <$> getBodhiFedoraReleases
 
 -- | Get list of current Fedora EPEL releases
 getEPELReleases :: IO [Release]
 getEPELReleases =
-  getProductReleases "FEDORA-EPEL"
+  mapMaybe readRelease <$> getBodhiEPELReleases
 
 -- releaseFilter :: (Release -> a) -> (a -> Bool) -> [Release] -> [Release]
 -- releaseFilter f p = filter (p . f)
