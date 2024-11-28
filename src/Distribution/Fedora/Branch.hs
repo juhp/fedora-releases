@@ -14,6 +14,7 @@
 module Distribution.Fedora.Branch
   ( Branch(..)
   , readBranch
+  , showBranch
   , eitherBranch
   , readActiveBranch
   , eitherActiveBranch
@@ -24,7 +25,6 @@ module Distribution.Fedora.Branch
   , branchDestTag
   , branchDistTag
   , branchRelease
-  , branchTarget
   , partitionBranches
   )
 where
@@ -101,27 +101,24 @@ readActiveBranch active cs =
     Left _ -> Nothing
     Right br -> Just br
 
-instance Show Branch where
-  show Rawhide = "rawhide"
-  show (Fedora n) = "f" ++ show n
-  show (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
-  show (EPELNext n) = "epel" ++ show n ++ "-next"
+showBranch :: Branch -> String
+showBranch Rawhide = "rawhide"
+showBranch (Fedora n) = "f" ++ show n
+showBranch (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
+showBranch (EPELNext n) = "epel" ++ show n ++ "-next"
 
 -- | Get Release associated with release Branch
 branchRelease :: Branch -> IO Release
 branchRelease br = do
   rels <- getActiveReleases
-  case releaseFilter releaseBranch (== show br) rels of
-    [] -> error' $ "release not found for branch " ++ show br
+  case releaseFilter releaseBranch (== showBranch br) rels of
+    [] -> error' $ "release not found for branch " ++ showBranch br
     [rel] -> return rel
-    rs -> error' $ "impossible happened: multiple releases for " ++ show br ++ ":\n" ++ unwords (map releaseBranch rs)
+    rs -> error' $ "impossible happened: multiple releases for " ++ showBranch br ++ ":\n" ++ unwords (map releaseBranch rs)
 
--- | Map Branch to Koji destination tag
-branchDestTag :: Branch -> String
-branchDestTag Rawhide = "rawhide"
-branchDestTag (Fedora n) = show (Fedora n) ++ "-updates-candidate"
-branchDestTag (EPEL n) = show (EPEL n) ++ "-testing-candidate"
-branchDestTag (EPELNext n) = show (EPELNext n) ++ "-testing-candidate"
+--- | Map Branch to Koji destination tag (candidate tag)
+branchDestTag :: Branch -> IO String
+branchDestTag br = releaseCandidateTag <$> branchRelease br
 
 -- | Get %dist tag for branch
 branchDistTag :: Branch -> IO String
@@ -132,12 +129,6 @@ branchDistTag (Fedora n) = return $ ".fc" ++ show n
 branchDistTag (EPEL n) = return $ ".el" ++ show n
 branchDistTag (EPELNext n) = return $ ".el" ++ show n ++ ".next"
 
--- | Default build target associated with a branch
-branchTarget :: Branch -> String
-branchTarget (Fedora n) = show (Fedora n)
-branchTarget (EPEL n) = show (EPEL n)
-branchTarget (EPELNext n) = show (EPELNext n)
-branchTarget Rawhide = "rawhide"
 
 -- | Returns newer branch than given one from supplied active branches.
 --
