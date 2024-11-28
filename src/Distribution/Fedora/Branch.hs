@@ -108,13 +108,10 @@ showBranch (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
 showBranch (EPELNext n) = "epel" ++ show n ++ "-next"
 
 -- | Get Release associated with release Branch
+--
+-- Fails if given an inactive branch
 branchRelease :: Branch -> IO Release
-branchRelease br = do
-  rels <- getActiveReleases
-  case releaseFilter releaseBranch (== showBranch br) rels of
-    [] -> error' $ "release not found for branch " ++ showBranch br
-    [rel] -> return rel
-    rs -> error' $ "impossible happened: multiple releases for " ++ showBranch br ++ ":\n" ++ unwords (map releaseBranch rs)
+branchRelease = getBranchRelease . showBranch
 
 --- | Map Branch to Koji destination tag (candidate tag)
 branchDestTag :: Branch -> IO String
@@ -168,9 +165,6 @@ partitionBranches args =
 getLatestFedoraBranch :: IO Branch
 getLatestFedoraBranch =
   headDef (error' "no active branched!") <$> getActiveBranched
-
-releaseFilter :: (Release -> a) -> (a -> Bool) -> [Release] -> [Release]
-releaseFilter f p = filter (p . f)
 
 reverseSort :: Ord a => [a] -> [a]
 reverseSort = sortBy (comparing Down)
