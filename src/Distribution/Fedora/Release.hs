@@ -18,7 +18,8 @@ module Distribution.Fedora.Release
   ( Release(..),
     getActiveReleases,
     getFedoraReleases,
-    getEPELReleases
+    getEPELReleases,
+    getBranchRelease
   )
 where
 
@@ -83,3 +84,17 @@ getFedoraReleases =
 getEPELReleases :: IO [Release]
 getEPELReleases =
   getProductReleases "FEDORA-EPEL"
+
+-- releaseFilter :: (Release -> a) -> (a -> Bool) -> [Release] -> [Release]
+-- releaseFilter f p = filter (p . f)
+
+-- | Get the Release for an active Branch
+--
+-- Errors for an inactive Branch
+getBranchRelease :: String -> IO Release
+getBranchRelease br = do
+  rels <- mapMaybe readRelease <$> getBodhiBranchReleases br
+  case rels of
+    [] -> error $ "release not found for branch " ++ br
+    [rel] -> return rel
+    _ -> error $ "multiple releases for " ++ br ++ ":\n" ++ unwords (map releaseName rels)
