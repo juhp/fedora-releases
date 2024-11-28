@@ -35,10 +35,6 @@ data Release = Release {
     releaseBranch :: String
   } deriving (Show,Eq)
 
-instance Ord Release where
-  compare r1 r2 =
-    compare (releaseName r1) (releaseName r2)
-
 readRelease :: Object -> Maybe Release
 readRelease obj = do
   name <- lookupKey "name" obj
@@ -47,6 +43,10 @@ readRelease obj = do
   guard (idPref `notElem` ["FEDORA-CONTAINER","FEDORA-FLATPAK"])
   br <- lookupKey "branch" obj
   return $ Release name ver idPref br
+
+instance Ord Release where
+  compare r1 r2 =
+    compare (releaseName r1) (releaseName r2)
 
 -- FIXME remove containers and flatpaks
 -- | Get list of all current Fedora Project releases (from Bodhi)
