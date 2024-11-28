@@ -56,7 +56,7 @@ getActiveReleases =
 
 getProductReleases :: String -> IO [Release]
 getProductReleases name =
-  filter (\p -> releaseIdPrefix p == name) <$> getReleases
+  mapMaybe readRelease <$> getBodhiProductReleases name
 
 -- | Get list of current Fedora Linux releases
 getFedoraReleases :: IO [Release]
