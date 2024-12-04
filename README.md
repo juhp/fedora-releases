@@ -9,8 +9,17 @@
 A Haskell library for Fedora release versions
 (formerly [fedora-dists](https://hackage.haskell.org/package/fedora-dists))
 
+There are 3 modules:
+
+- Distribution.Fedora.Branch : top level (Branch type)
+- Distribution.Fedora.Release : mid level (Release type)
+- Distribution.Fedora.BodhiReleases : low level (aeson Object)
+
+It uses the Releases endpoint data from the Fedora Bodhi API
+(via [bodhi-hs](https://github.com/juhp/bodhi-hs)).
+
 See <https://hackage.haskell.org/package/fedora-releases> for documentation.
 
-fedora-releases is distributed under GPL version 3 or later.
+fedora-releases is released and distributed under GPL version 3 or later.
 
 Repository: <https://github.com/juhp/fedora-releases>
