@@ -2,7 +2,15 @@
 
 `fedora-releases` uses [PVP Versioning](https://pvp.haskell.org).
 
-## 0.1.0
+## 0.2.0 (2024-12-04)
+- newerBranch now returns Maybe Branch
+- custom Ord Branch instance to correct the order of EPELNext
+- export extended Distribution.Fedora.BodhiReleases
+- getActiveReleases replaces getReleases (no longer reversed)
+- getActiveBranches (reverse sorted) replaces getFedoraBranches
+- similarly getActiveBranched replaces getFedoraBranched
+
+## 0.1.0 (2024-08-16)
 - project renamed from [fedora-dists](https://hackage.haskell.org/package/fedora-dists) to fedora-releases
 - uses Bodhi releases API endpoint instead of obsolete PDC Product versions
 - Distribution.Fedora and the Dist type in particular are gone
