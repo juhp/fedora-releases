@@ -1,6 +1,10 @@
+{-|
+The module provides a Branch type for Fedora and EPEL for active Release's.
+-}
+
 -- |
 -- Module      :  Distribution.Fedora.Branch
--- Copyright   :  (C) 2020-2022,2024  Jens Petersen
+-- Copyright   :  (C) 2020-2022, 2024  Jens Petersen
 --
 -- Maintainer  :  Jens Petersen <petersen@fedoraproject.org>
 --
@@ -45,6 +49,7 @@ import Distribution.Fedora.Release
 data Branch = EPEL !Int | EPELNext !Int | Fedora !Int | Rawhide
   deriving (Eq)
 
+-- | defined such that: EPELNext 9 < EPEL 10 < Fedora 41 < Rawhide
 instance Ord Branch where
   compare Rawhide Rawhide = EQ
   compare (Fedora m) (Fedora n) = compare m n
@@ -101,6 +106,7 @@ readActiveBranch active cs =
     Left _ -> Nothing
     Right br -> Just br
 
+-- | render Branch to String
 showBranch :: Branch -> String
 showBranch Rawhide = "rawhide"
 showBranch (Fedora n) = "f" ++ show n
@@ -113,11 +119,15 @@ showBranch (EPELNext n) = "epel" ++ show n ++ "-next"
 branchRelease :: Branch -> IO Release
 branchRelease = getBranchRelease . showBranch
 
---- | Map Branch to Koji destination tag (candidate tag)
+-- | Map Branch to Koji destination tag (candidate tag)
 branchDestTag :: Branch -> IO String
 branchDestTag br = releaseCandidateTag <$> branchRelease br
 
--- | Get %dist tag for branch
+-- | Converts koji dist tag  to rpm %dist tag for branch
+--
+-- f41 -> .fc41
+--
+-- epel10.0 -> .el10_0
 branchDistTag :: Branch -> IO String
 branchDistTag br = do
   dist <- releaseDistTag <$> branchRelease br

@@ -1,6 +1,10 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE CPP                 #-}
 
+{-|
+Low level library with aeson Object's for releases fetched from Bodhi API.
+-}
+
 module Distribution.Fedora.BodhiReleases (
   getBodhiReleases,
   getBodhiProductReleases,
@@ -34,11 +38,12 @@ getBodhiFedoraReleases :: IO [Object]
 getBodhiFedoraReleases =
   getBodhiProductReleases "FEDORA"
 
--- | Get EPEL Releases from Bodhi API
+-- | Get FEDORA-EPEL Releases from Bodhi API
 getBodhiEPELReleases :: IO [Object]
 getBodhiEPELReleases =
   getBodhiProductReleases "FEDORA-EPEL"
 
+-- | Get releases for branch name
 getBodhiBranchReleases :: String -> IO [Object]
 getBodhiBranchReleases br =
   filter (\r -> lookupKey "branch" r == Just br) <$> getBodhiReleases

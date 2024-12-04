@@ -1,9 +1,14 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE CPP                 #-}
 
+{-|
+The module provides a higher level API over BodhiReleases
+with a Release record type.
+-}
+
 -- |
 -- Module      :  Distribution.Fedora.Release
--- Copyright   :  (C) 2020-2022,2024  Jens Petersen
+-- Copyright   :  (C) 2020-2022, 2024  Jens Petersen
 --
 -- Maintainer  :  Jens Petersen <petersen@fedoraproject.org>
 --
@@ -61,6 +66,7 @@ readRelease obj = do
   testtag <- lookupKey "testing_tag" obj
   return $ Release name ver idPref br composed candidate disttag setting state automatic testrepo testtag
 
+-- | ordered by releaseName
 instance Ord Release where
   compare r1 r2 =
     compare (releaseName r1) (releaseName r2)
