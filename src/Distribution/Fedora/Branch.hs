@@ -2,14 +2,6 @@
 The module provides a Branch type for Fedora and EPEL for active Release's.
 -}
 
--- |
--- Module      :  Distribution.Fedora.Branch
--- Copyright   :  (C) 2020-2022, 2024  Jens Petersen
---
--- Maintainer  :  Jens Petersen <petersen@fedoraproject.org>
---
--- Explanation: Fedora Branch type and functions
-
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or

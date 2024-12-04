@@ -1,23 +1,15 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE CPP                 #-}
 
-{-|
-The module provides a higher level API over BodhiReleases
-with a Release record type.
--}
-
--- |
--- Module      :  Distribution.Fedora.Release
--- Copyright   :  (C) 2020-2022, 2024  Jens Petersen
---
--- Maintainer  :  Jens Petersen <petersen@fedoraproject.org>
---
--- Explanation: Fedora Release type and functions
-
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or
 -- (at your option) any later version.
+
+{-|
+The module provides a higher level API over BodhiReleases
+with a Release record type.
+-}
 
 module Distribution.Fedora.Release
   ( Release(..),
