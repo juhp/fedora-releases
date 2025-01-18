@@ -27,11 +27,11 @@ where
 
 import Data.Char (isDigit)
 import Data.Either (partitionEithers)
-import Data.List.Extra (delete, elemIndex, replace, sortBy)
+import Data.List.Extra (delete, elemIndex, replace, sortBy, spanEnd)
 import Data.Maybe (mapMaybe)
 import Data.Ord (comparing, Down(Down))
 import Data.Tuple (swap)
-import Safe (headDef)
+import Safe (headDef, readMay)
 
 import Distribution.Fedora.Release
 
@@ -56,14 +56,23 @@ instance Ord Branch where
 
 -- | Read a Fedora Branch name, otherwise return branch string
 eitherBranch :: String -> Either String Branch
-eitherBranch "rawhide" = Right Rawhide
-eitherBranch ('f':ns) | all isDigit ns = let br = Fedora (read ns) in Right br
--- FIXME add proper parsing:
-eitherBranch "epel8-next" = Right $ EPELNext 8
-eitherBranch "epel9-next" = Right $ EPELNext 9
-eitherBranch ('e':'p':'e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
-eitherBranch ('e':'l':n) | all isDigit n = let br = EPEL (read n) in Right br
-eitherBranch cs = Left cs
+eitherBranch str =
+  case str of
+    "" -> Left str -- error or NonEmpty?
+    "rawhide" -> Right Rawhide
+    "epel8-next" -> Right $ EPELNext 8
+    "epel9-next" -> Right $ EPELNext 9
+    _ ->
+      case spanEnd isDigit str of
+        (pre,ns) ->
+          case readMay ns of
+            Nothing -> Left str
+            Just num ->
+              case pre of
+                   "f" -> Right $ Fedora num
+                   "epel" -> Right $ EPEL num
+                   "el" -> Right $ EPEL num
+                   _ -> Left str
 
 -- -- | Read a Fedora Branch name, otherwise return an error message
 -- eitherBranch' :: String -> Either String Branch
