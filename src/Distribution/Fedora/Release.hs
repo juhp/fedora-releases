@@ -67,7 +67,7 @@ instance Ord Release where
   compare r1 r2 =
     compare (releaseName r1) (releaseName r2)
 
--- FIXME remove containers and flatpaks
+-- containers and flatpaks are filtered out by readRelease
 -- | Get list of all current Fedora Project releases (from Bodhi)
 getActiveReleases :: IO [Release]
 getActiveReleases =
