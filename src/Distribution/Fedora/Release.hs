@@ -12,11 +12,11 @@ with a Release record type.
 -}
 
 module Distribution.Fedora.Release
-  ( Release(..),
-    getActiveReleases,
-    getFedoraReleases,
-    getEPELReleases,
-    getBranchRelease
+  ( Release(..)
+  , getActiveReleases
+  , getFedoraReleases
+  , getEPELReleases
+  , getBranchRelease
   )
 where
 
