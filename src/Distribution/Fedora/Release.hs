@@ -17,6 +17,7 @@ module Distribution.Fedora.Release
   , getFedoraReleases
   , getEPELReleases
   , getBranchRelease
+  , getRawhideVersion
   )
 where
 
@@ -24,6 +25,7 @@ import Control.Monad (guard)
 import Data.Aeson(Object)
 import Data.Maybe (mapMaybe)
 import Distribution.Fedora.BodhiReleases
+import Numeric.Natural (Natural)
 
 -- | Fedora Release data
 data Release = Release {
@@ -96,3 +98,8 @@ getBranchRelease br = do
     [] -> error $ "release not found for branch " ++ br
     [rel] -> return rel
     _ -> error $ "multiple releases for " ++ br ++ ":\n" ++ unwords (map releaseName rels)
+
+-- | Get the Fedora release version of Rawhide
+getRawhideVersion :: IO Natural
+getRawhideVersion =
+  read . releaseVersion <$> getBranchRelease "rawhide"
