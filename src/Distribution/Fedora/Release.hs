@@ -18,6 +18,7 @@ module Distribution.Fedora.Release
   , getEPELReleases
   , getBranchRelease
   , getRawhideVersion
+  , getCurrentFedoraVersion
   )
 where
 
@@ -26,6 +27,7 @@ import Data.Aeson(Object)
 import Data.Maybe (mapMaybe)
 import Distribution.Fedora.BodhiReleases
 import Numeric.Natural (Natural)
+import Safe (headMay)
 
 -- | Fedora Release data
 data Release = Release {
@@ -103,3 +105,11 @@ getBranchRelease br = do
 getRawhideVersion :: IO Natural
 getRawhideVersion =
   read . releaseVersion <$> getBranchRelease "rawhide"
+
+-- | Get the latest current stable Fedora release version
+getCurrentFedoraVersion :: IO Natural
+getCurrentFedoraVersion = do
+  rels <- filter ((== "current") . releaseState) <$> getFedoraReleases
+  case headMay rels of
+    Just rel -> return $ read $ releaseVersion rel
+    Nothing -> error "current fedora release not found"
