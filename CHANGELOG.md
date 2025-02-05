@@ -2,6 +2,10 @@
 
 `fedora-releases` uses [PVP Versioning](https://pvp.haskell.org).
 
+## 0.2.1 (2025-02-07)
+- Release: add getRawhideVersion and getCurrentFedoraVersion
+- eitherBranch: fix misparse (read error) of "epel/" as branch
+
 ## 0.2.0 (2024-12-04)
 - newerBranch now returns Maybe Branch
 - custom Ord Branch instance to correct the order of EPELNext
