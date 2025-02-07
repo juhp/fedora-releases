@@ -30,6 +30,8 @@ import Numeric.Natural (Natural)
 import Safe (headMay)
 
 -- | Fedora Release data
+--
+-- See <https://bodhi.fedoraproject.org/releases/>
 data Release = Release {
     releaseName :: String,
     releaseVersion :: String,
