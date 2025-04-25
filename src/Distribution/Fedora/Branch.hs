@@ -31,6 +31,7 @@ import Data.List.Extra (delete, elemIndex, replace, sortBy, spanEnd)
 import Data.Maybe (mapMaybe)
 import Data.Ord (comparing, Down(Down))
 import Data.Tuple (swap)
+import Numeric.Natural (Natural)
 import Safe (headDef, readMay)
 
 import Distribution.Fedora.Release
@@ -38,7 +39,7 @@ import Distribution.Fedora.Release
 -- | Branch datatype
 --
 -- Branch can be rawhide, or a fedora or epel branch
-data Branch = EPEL !Int | EPELNext !Int | Fedora !Int | Rawhide
+data Branch = EPELMinor !Natural !Natural | EPEL !Natural | EPELNext !Natural | Fedora !Natural | Rawhide
   deriving (Eq)
 
 -- | defined such that: EPELNext 9 < EPEL 10 < Fedora 41 < Rawhide
@@ -47,12 +48,21 @@ instance Ord Branch where
   compare (Fedora m) (Fedora n) = compare m n
   compare (EPELNext m) (EPELNext n) = compare m n
   compare (EPEL m) (EPEL n) = compare m n
+  compare (EPELMinor m1 n1) (EPELMinor m2 n2) =
+    case compare m1 m2 of
+      LT -> LT
+      GT -> GT
+      EQ -> compare n1 n2
   compare Rawhide _ = GT
   compare _ Rawhide = LT
   compare (Fedora _) _ = GT
   compare _ (Fedora _) = LT
   compare (EPEL m) (EPELNext n) = if m == n then LT else compare m n
   compare (EPELNext m) (EPEL n) = if m == n then GT else compare m n
+  compare (EPEL m) (EPELMinor maj _) = if m >= maj then GT else LT
+  compare (EPELMinor maj _) (EPEL n) = if maj <= n then LT else GT
+  compare (EPELMinor _ _) (EPELNext _) = GT
+  compare (EPELNext _) (EPELMinor _ _) = LT
 
 -- | Read a Fedora Branch name, otherwise return branch string
 eitherBranch :: String -> Either String Branch
@@ -71,6 +81,7 @@ eitherBranch str =
               case pre of
                    "f" -> Right $ Fedora num
                    "epel" -> Right $ EPEL num
+                   "epel10." -> Right $ EPELMinor 10 num
                    "el" -> Right $ EPEL num
                    _ -> Left str
 
@@ -113,6 +124,7 @@ showBranch Rawhide = "rawhide"
 showBranch (Fedora n) = "f" ++ show n
 showBranch (EPEL n) = (if n <= 6 then "el" else "epel") ++ show n
 showBranch (EPELNext n) = "epel" ++ show n ++ "-next"
+showBranch (EPELMinor m n) = "epel" ++ show m ++ '.' : show n
 
 -- | Get Release associated with release Branch
 --
@@ -137,6 +149,8 @@ branchDistTag br = do
   return $ '.' : (distroFix br . replace "." "_") dist
   where
     distroFix (EPEL _) = replace "epel" "el"
+    distroFix (EPELNext _) = replace "epel" "el"
+    distroFix (EPELMinor _ _) = replace "epel" "el"
     distroFix _ = replace "f" "fc"
 
 -- | Returns newer branch than given one from supplied active branches.
