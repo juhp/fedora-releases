@@ -44,7 +44,8 @@ data Release = Release {
     releaseState :: String,
     releaseAutomaticUpdates :: Bool,
     releaseTestingRepo :: Maybe String,
-    releaseTestingTag :: String
+    releaseTestingTag :: String,
+    releaseEOL :: Maybe String
   } deriving (Show,Eq)
 
 readRelease :: Object -> Maybe Release
@@ -62,7 +63,8 @@ readRelease obj = do
   automatic <- lookupKey "create_automatic_updates" obj
   let testrepo = lookupKey "testing_repository" obj
   testtag <- lookupKey "testing_tag" obj
-  return $ Release name ver idPref br composed candidate disttag setting state automatic testrepo testtag
+  let eol = lookupKey "eol" obj
+  return $ Release name ver idPref br composed candidate disttag setting state automatic testrepo testtag eol
 
 -- | ordered by releaseName
 instance Ord Release where
