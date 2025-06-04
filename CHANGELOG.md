@@ -2,8 +2,9 @@
 
 `fedora-releases` uses [PVP Versioning](https://pvp.haskell.org).
 
-## 0.3.0 (2025-04-25)
+## 0.3.0 (2025-06-04)
 - Branch: add epel10.x minor branches
+- Release: include eol field
 
 ## 0.2.1 (2025-02-07)
 - Release: add getRawhideVersion and getCurrentFedoraVersion
